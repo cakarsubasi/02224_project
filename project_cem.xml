@@ -12,11 +12,25 @@ typedef int[0, 1] feed_belt_t;
 const feed_belt_t LEFT_BELT = 0;
 const feed_belt_t RIGHT_BELT = 1;
 
-chan feed_belt_stop[2];
+chan feed_belt_stop[2]; // can be eliminated with variables
 chan feed_belt_run[2];
 
+bool feed_belt_b[2];
+
+
 chan dist_switch;
-chan feed_switch[2];</declaration>
+chan feed_switch[2];
+
+const int NUM_BAGS = 1;
+
+color_t bag_colors[NUM_BAGS];
+
+int dropped_bag;
+
+chan bag_left;
+
+bool sensor_on[2] = {false, false};
+int sensor_val[2] = {100, 100};</declaration>
 	<template>
 		<name>SmortBagDropper</name>
 		<location id="id0" x="-51" y="-85">
@@ -183,236 +197,318 @@ chan feed_switch[2];</declaration>
 	</template>
 	<template>
 		<name x="9" y="9">Bag</name>
+		<parameter>const int id</parameter>
 		<declaration>// Place local declarations here.
 clock x;
-</declaration>
-		<location id="id28" x="-85" y="-85">
-			<name x="-93" y="-119">placed1</name>
+
+int storage = 0;
+
+color_t color;
+
+void sInval(feed_belt_t side) {
+    if (sensor_on[side]) {
+    double uniform = random(1);
+    if (color == YELLOW) {
+        uniform = uniform * 10 + 60;
+    } else {
+        uniform = uniform * 25 + 45;
+    }
+    sensor_val[side] = fint(uniform);
+    }
+}
+
+void sVal(feed_belt_t side) {
+    if (sensor_on[side]) {
+        double uniform = random(1);
+        if (color == YELLOW) {
+            uniform = uniform * 10 + 50;
+        } else {
+            uniform = uniform * 15 + 30;
+        }
+        sensor_val[side] = fint(uniform);
+    }
+}
+
+void sRes(feed_belt_t side) {
+    if (sensor_on[side]) {
+        double uniform = random(1);
+        sensor_val[side] = fint(uniform * 30 + 70);
+    }
+}</declaration>
+		<location id="id28" x="-85" y="-272">
+			<name x="-93" y="-306">placed1</name>
 		</location>
-		<location id="id29" x="162" y="-93">
-			<name x="153" y="-127">placed2</name>
+		<location id="id29" x="162" y="-280">
+			<name x="153" y="-314">placed2</name>
 		</location>
-		<location id="id30" x="-85" y="9">
-			<name x="-93" y="-25">sensor1</name>
+		<location id="id30" x="-85" y="-204">
+			<name x="-68" y="-229">sensor_entering</name>
+			<label kind="invariant" x="-59" y="-204">x &lt;= 8</label>
 		</location>
-		<location id="id31" x="162" y="-8">
-			<name x="153" y="-42">sensor2</name>
+		<location id="id31" x="162" y="-195">
+			<name x="153" y="-229">sensor2</name>
 		</location>
-		<location id="id32" x="34" y="-161">
-			<name x="17" y="-221">Start</name>
+		<location id="id32" x="34" y="-348">
+			<name x="17" y="-408">Start</name>
 		</location>
-		<location id="id33" x="-85" y="136">
-			<name x="-76" y="102">turning_begin1</name>
-			<label kind="invariant" x="-68" y="119">x &lt;= 27</label>
+		<location id="id33" x="-85" y="195">
+			<name x="-76" y="161">turning_begin1</name>
+			<label kind="invariant" x="-68" y="178">x &lt;= 27</label>
 		</location>
-		<location id="id34" x="170" y="128">
-			<name x="238" y="111">turning_begin2</name>
-			<label kind="invariant" x="94" y="119">x &lt;= 27</label>
+		<location id="id34" x="170" y="187">
+			<name x="238" y="170">turning_begin2</name>
+			<label kind="invariant" x="94" y="178">x &lt;= 27</label>
 		</location>
-		<location id="id35" x="-255" y="306">
+		<location id="id35" x="-272" y="442">
 		</location>
-		<location id="id36" x="-144" y="306">
+		<location id="id36" x="-85" y="442">
 		</location>
-		<location id="id37" x="230" y="306">
+		<location id="id37" x="230" y="442">
 		</location>
-		<location id="id38" x="332" y="306">
+		<location id="id38" x="332" y="442">
 		</location>
-		<location id="id39" x="468" y="306">
-			<name x="501" y="280">dist_right_end</name>
+		<location id="id39" x="646" y="450">
+			<name x="679" y="424">dist_right_end</name>
 			<urgent/>
 		</location>
-		<location id="id40" x="-365" y="306">
-			<name x="-501" y="280">dist_left_end</name>
+		<location id="id40" x="-501" y="442">
+			<name x="-637" y="416">dist_left_end</name>
 			<urgent/>
 		</location>
-		<location id="id41" x="-170" y="238">
-			<name x="-144" y="221">turning_end1</name>
+		<location id="id41" x="-170" y="297">
+			<name x="-144" y="280">turning_end1</name>
 			<committed/>
 		</location>
-		<location id="id42" x="247" y="221">
-			<name x="238" y="187">turning_end2</name>
+		<location id="id42" x="247" y="280">
+			<name x="238" y="246">turning_end2</name>
 			<committed/>
+		</location>
+		<location id="id43" x="-85" y="-110">
+			<name x="-59" y="-127">sensor_front</name>
+			<label kind="invariant" x="-59" y="-110">x &lt;= 12</label>
+		</location>
+		<location id="id44" x="-85" y="-8">
+			<name x="-59" y="-25">sensor_exiting</name>
+			<label kind="invariant" x="-68" y="-8">x &lt;= 8</label>
+		</location>
+		<location id="id45" x="-85" y="102">
+			<label kind="invariant" x="-59" y="102">x &lt;= 24</label>
 		</location>
 		<init ref="id32"/>
-		<transition id="id43">
-			<source ref="id42"/>
-			<target ref="id37"/>
-			<label kind="synchronisation" x="162" y="247">dist_left!</label>
-		</transition>
-		<transition id="id44">
-			<source ref="id41"/>
-			<target ref="id36"/>
-			<label kind="synchronisation" x="-153" y="247">dist_right!</label>
-		</transition>
-		<transition id="id45">
-			<source ref="id41"/>
-			<target ref="id35"/>
-			<label kind="synchronisation" x="-272" y="247">dist_left!</label>
-		</transition>
 		<transition id="id46">
-			<source ref="id33"/>
-			<target ref="id33"/>
-			<label kind="synchronisation" x="-340" y="102">feed_belt_stop[LEFT_BELT]!</label>
-			<nail x="-119" y="102"/>
-			<nail x="-144" y="136"/>
+			<source ref="id45"/>
+			<target ref="id45"/>
+			<label kind="guard" x="-255" y="59">feed_belt_b[0]</label>
+			<label kind="assignment" x="-246" y="85">x := 0</label>
+			<nail x="-136" y="42"/>
+			<nail x="-136" y="127"/>
 		</transition>
 		<transition id="id47">
-			<source ref="id30"/>
-			<target ref="id30"/>
-			<label kind="synchronisation" x="-340" y="-17">feed_belt_stop[LEFT_BELT]!</label>
-			<nail x="-127" y="-17"/>
-			<nail x="-144" y="34"/>
+			<source ref="id45"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-59" y="119">x &gt;= 24</label>
+			<label kind="assignment" x="-51" y="144">x := 0</label>
 		</transition>
 		<transition id="id48">
-			<source ref="id28"/>
-			<target ref="id28"/>
-			<label kind="synchronisation" x="-314" y="-127">feed_belt_stop[LEFT_BELT]!</label>
-			<nail x="-110" y="-119"/>
-			<nail x="-136" y="-85"/>
+			<source ref="id44"/>
+			<target ref="id45"/>
+			<label kind="guard" x="-68" y="9">x == 8</label>
+			<label kind="assignment" x="-68" y="26">x := 0,
+sRes(LEFT_BELT)</label>
 		</transition>
 		<transition id="id49">
-			<source ref="id29"/>
-			<target ref="id29"/>
-			<label kind="synchronisation" x="238" y="-127">feed_belt_stop[RIGHT_BELT]!</label>
-			<nail x="187" y="-136"/>
-			<nail x="230" y="-102"/>
+			<source ref="id43"/>
+			<target ref="id44"/>
+			<label kind="guard" x="-59" y="-93">x == 12</label>
+			<label kind="assignment" x="-59" y="-76">x := 0,
+sInval(LEFT_BELT)</label>
 		</transition>
 		<transition id="id50">
-			<source ref="id31"/>
-			<target ref="id31"/>
-			<label kind="synchronisation" x="246" y="-42">feed_belt_stop[RIGHT_BELT]!</label>
-			<nail x="204" y="-42"/>
-			<nail x="213" y="0"/>
+			<source ref="id30"/>
+			<target ref="id43"/>
+			<label kind="guard" x="-59" y="-186">x == 8</label>
+			<label kind="assignment" x="-68" y="-169">x := 0,
+sVal(LEFT_BELT)</label>
 		</transition>
 		<transition id="id51">
-			<source ref="id34"/>
-			<target ref="id34"/>
-			<label kind="synchronisation" x="229" y="76">feed_belt_stop[RIGHT_BELT]!</label>
-			<nail x="204" y="77"/>
-			<nail x="230" y="119"/>
+			<source ref="id42"/>
+			<target ref="id37"/>
+			<label kind="synchronisation" x="162" y="306">dist_left!</label>
 		</transition>
 		<transition id="id52">
-			<source ref="id39"/>
-			<target ref="id32"/>
-			<nail x="349" y="-110"/>
-			<nail x="272" y="-161"/>
+			<source ref="id41"/>
+			<target ref="id36"/>
+			<label kind="synchronisation" x="-153" y="306">dist_right!</label>
 		</transition>
 		<transition id="id53">
-			<source ref="id40"/>
-			<target ref="id32"/>
-			<nail x="-246" y="-119"/>
-			<nail x="-153" y="-161"/>
+			<source ref="id41"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-272" y="306">dist_left!</label>
 		</transition>
 		<transition id="id54">
-			<source ref="id35"/>
-			<target ref="id40"/>
-			<label kind="guard" x="-433" y="323">x &gt;= 10 &amp;&amp; x &lt;= 12</label>
-			<label kind="synchronisation" x="-348" y="280">dist_left!</label>
-			<label kind="assignment" x="-382" y="340">x := 0</label>
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-340" y="161">feed_belt_stop[LEFT_BELT]!</label>
+			<nail x="-119" y="161"/>
+			<nail x="-144" y="195"/>
 		</transition>
 		<transition id="id55">
-			<source ref="id35"/>
-			<target ref="id36"/>
-			<label kind="guard" x="-229" y="332">x &gt;= 22 &amp;&amp; x &lt;=23</label>
-			<label kind="synchronisation" x="-238" y="357">dist_right!</label>
-			<label kind="assignment" x="-221" y="400">x := 0</label>
-			<nail x="-195" y="332"/>
+			<source ref="id30"/>
+			<target ref="id30"/>
+			<label kind="assignment" x="-204" y="-212">x := 0</label>
+			<nail x="-127" y="-230"/>
+			<nail x="-144" y="-179"/>
 		</transition>
 		<transition id="id56">
-			<source ref="id36"/>
-			<target ref="id35"/>
-			<label kind="guard" x="-221" y="264">x &gt;= 22 &amp;&amp; x &lt;= 23</label>
-			<label kind="synchronisation" x="-237" y="276">dist_left!</label>
-			<label kind="assignment" x="-221" y="383">x := 0</label>
-			<nail x="-187" y="281"/>
+			<source ref="id28"/>
+			<target ref="id28"/>
+			<nail x="-110" y="-306"/>
+			<nail x="-136" y="-272"/>
 		</transition>
 		<transition id="id57">
-			<source ref="id38"/>
-			<target ref="id37"/>
-			<label kind="guard" x="255" y="315">x &gt;= 22 &amp;&amp; x &lt;=23</label>
-			<label kind="synchronisation" x="246" y="348">dist_left!</label>
-			<label kind="assignment" x="255" y="383">x := 0</label>
-			<nail x="289" y="323"/>
+			<source ref="id29"/>
+			<target ref="id29"/>
+			<label kind="synchronisation" x="238" y="-314">feed_belt_stop[RIGHT_BELT]!</label>
+			<nail x="187" y="-323"/>
+			<nail x="230" y="-289"/>
 		</transition>
 		<transition id="id58">
-			<source ref="id37"/>
-			<target ref="id38"/>
-			<label kind="guard" x="247" y="264">x &gt;= 22 &amp;&amp; x &lt;=23</label>
-			<label kind="assignment" x="255" y="366">x := 0</label>
-			<nail x="281" y="281"/>
+			<source ref="id31"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="246" y="-229">feed_belt_stop[RIGHT_BELT]!</label>
+			<nail x="204" y="-229"/>
+			<nail x="213" y="-187"/>
 		</transition>
 		<transition id="id59">
-			<source ref="id37"/>
-			<target ref="id36"/>
-			<label kind="guard" x="-25" y="323">x &gt;= 25 &amp;&amp; x &lt;= 31</label>
-			<label kind="synchronisation" x="0" y="365">dist_left!</label>
-			<label kind="assignment" x="9" y="340">x := 0</label>
+			<source ref="id34"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="229" y="135">feed_belt_stop[RIGHT_BELT]!</label>
+			<nail x="204" y="136"/>
+			<nail x="230" y="178"/>
 		</transition>
 		<transition id="id60">
-			<source ref="id36"/>
-			<target ref="id37"/>
-			<label kind="guard" x="-25" y="221">x &gt;= 25 &amp;&amp; x &lt;= 31</label>
-			<label kind="synchronisation" x="0" y="263">dist_right!</label>
-			<label kind="assignment" x="17" y="247">x := 0</label>
-			<nail x="51" y="247"/>
+			<source ref="id39"/>
+			<target ref="id32"/>
+			<nail x="349" y="-297"/>
+			<nail x="272" y="-348"/>
 		</transition>
 		<transition id="id61">
-			<source ref="id38"/>
-			<target ref="id39"/>
-			<label kind="guard" x="400" y="323">x &gt;= 10 &amp;&amp; x &lt;= 12</label>
-			<label kind="synchronisation" x="365" y="280">dist_right!</label>
-			<label kind="assignment" x="442" y="340">x := 0</label>
+			<source ref="id40"/>
+			<target ref="id32"/>
+			<nail x="-246" y="-306"/>
+			<nail x="-153" y="-348"/>
 		</transition>
 		<transition id="id62">
-			<source ref="id42"/>
-			<target ref="id38"/>
-			<label kind="synchronisation" x="289" y="247">dist_right!</label>
+			<source ref="id35"/>
+			<target ref="id40"/>
+			<label kind="guard" x="-433" y="459">x &gt;= 10 &amp;&amp; x &lt;= 12</label>
+			<label kind="synchronisation" x="-348" y="416">dist_left!</label>
+			<label kind="assignment" x="-382" y="476">x := 0</label>
 		</transition>
 		<transition id="id63">
-			<source ref="id33"/>
-			<target ref="id41"/>
-			<label kind="guard" x="-68" y="153">x &gt;= 24</label>
-			<label kind="synchronisation" x="-340" y="153">feed_belt_run[LEFT_BELT]!</label>
-			<label kind="assignment" x="-68" y="170">x := 0</label>
-			<nail x="-110" y="179"/>
+			<source ref="id35"/>
+			<target ref="id36"/>
+			<label kind="guard" x="-229" y="468">x &gt;= 22 &amp;&amp; x &lt;=23</label>
+			<label kind="synchronisation" x="-238" y="493">dist_right!</label>
+			<label kind="assignment" x="-221" y="536">x := 0</label>
+			<nail x="-195" y="468"/>
 		</transition>
 		<transition id="id64">
-			<source ref="id30"/>
-			<target ref="id33"/>
-			<label kind="synchronisation" x="-314" y="42">feed_belt_run[LEFT_BELT]!</label>
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<label kind="guard" x="-221" y="400">x &gt;= 22 &amp;&amp; x &lt;= 23</label>
+			<label kind="synchronisation" x="-237" y="412">dist_left!</label>
+			<label kind="assignment" x="-221" y="519">x := 0</label>
+			<nail x="-187" y="417"/>
 		</transition>
 		<transition id="id65">
-			<source ref="id28"/>
-			<target ref="id30"/>
-			<label kind="synchronisation" x="-306" y="-68">feed_belt_run[LEFT_BELT]!</label>
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="guard" x="255" y="451">x &gt;= 22 &amp;&amp; x &lt;=23</label>
+			<label kind="synchronisation" x="246" y="484">dist_left!</label>
+			<label kind="assignment" x="255" y="519">x := 0</label>
+			<nail x="289" y="459"/>
 		</transition>
 		<transition id="id66">
-			<source ref="id31"/>
-			<target ref="id34"/>
-			<label kind="synchronisation" x="238" y="25">feed_belt_run[RIGHT_BELT]!</label>
+			<source ref="id37"/>
+			<target ref="id38"/>
+			<label kind="guard" x="247" y="400">x &gt;= 22 &amp;&amp; x &lt;=23</label>
+			<label kind="assignment" x="255" y="502">x := 0</label>
+			<nail x="281" y="417"/>
 		</transition>
 		<transition id="id67">
-			<source ref="id29"/>
-			<target ref="id31"/>
-			<label kind="synchronisation" x="238" y="-85">feed_belt_run[RIGHT_BELT]!</label>
+			<source ref="id37"/>
+			<target ref="id36"/>
+			<label kind="guard" x="-25" y="459">x &gt;= 25 &amp;&amp; x &lt;= 31</label>
+			<label kind="synchronisation" x="0" y="501">dist_left!</label>
+			<label kind="assignment" x="9" y="476">x := 0</label>
 		</transition>
 		<transition id="id68">
-			<source ref="id32"/>
-			<target ref="id29"/>
-			<label kind="synchronisation" x="51" y="-144">place_right?</label>
+			<source ref="id36"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-25" y="357">x &gt;= 25 &amp;&amp; x &lt;= 31</label>
+			<label kind="synchronisation" x="0" y="399">dist_right!</label>
+			<label kind="assignment" x="17" y="383">x := 0</label>
+			<nail x="51" y="383"/>
 		</transition>
 		<transition id="id69">
-			<source ref="id32"/>
-			<target ref="id28"/>
-			<label kind="synchronisation" x="-68" y="-136">place_left?</label>
+			<source ref="id38"/>
+			<target ref="id39"/>
+			<label kind="guard" x="400" y="459">x &gt;= 10 &amp;&amp; x &lt;= 12</label>
+			<label kind="synchronisation" x="365" y="416">dist_right!</label>
+			<label kind="assignment" x="442" y="476">x := 0</label>
 		</transition>
 		<transition id="id70">
+			<source ref="id42"/>
+			<target ref="id38"/>
+			<label kind="synchronisation" x="289" y="306">dist_right!</label>
+		</transition>
+		<transition id="id71">
+			<source ref="id33"/>
+			<target ref="id41"/>
+			<label kind="guard" x="-68" y="212">x &gt;= 24</label>
+			<label kind="synchronisation" x="-340" y="212">feed_belt_run[LEFT_BELT]!</label>
+			<label kind="assignment" x="-68" y="229">x := 0</label>
+			<nail x="-110" y="238"/>
+		</transition>
+		<transition id="id72">
+			<source ref="id28"/>
+			<target ref="id30"/>
+			<label kind="assignment" x="-68" y="-263">x := 0,
+sInval(LEFT_BELT)</label>
+		</transition>
+		<transition id="id73">
+			<source ref="id31"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="238" y="-145">feed_belt_run[RIGHT_BELT]!</label>
+		</transition>
+		<transition id="id74">
+			<source ref="id29"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="238" y="-272">feed_belt_run[RIGHT_BELT]!</label>
+		</transition>
+		<transition id="id75">
+			<source ref="id32"/>
+			<target ref="id29"/>
+			<label kind="select" x="76" y="-391">random_color : color_t</label>
+			<label kind="synchronisation" x="85" y="-340">place_right?</label>
+			<label kind="assignment" x="85" y="-374">color := random_color</label>
+		</transition>
+		<transition id="id76">
+			<source ref="id32"/>
+			<target ref="id28"/>
+			<label kind="select" x="-195" y="-391">random_color : color_t</label>
+			<label kind="synchronisation" x="-119" y="-340">place_left?</label>
+			<label kind="assignment" x="-187" y="-374">color := random_color,
+x := 0</label>
+		</transition>
+		<transition id="id77">
 			<source ref="id34"/>
 			<target ref="id42"/>
-			<label kind="guard" x="119" y="153">x &gt;= 24</label>
-			<label kind="synchronisation" x="238" y="153">feed_belt_run[RIGHT_BELT]!</label>
-			<label kind="assignment" x="119" y="170">x := 0</label>
-			<nail x="187" y="162"/>
+			<label kind="guard" x="119" y="212">x &gt;= 24</label>
+			<label kind="synchronisation" x="238" y="212">feed_belt_run[RIGHT_BELT]!</label>
+			<label kind="assignment" x="119" y="229">x := 0</label>
+			<nail x="187" y="221"/>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -421,13 +517,22 @@ clock x;
 left_belt = Feed(LEFT_BELT);
 right_belt = Feed(RIGHT_BELT);
 
-system Bag, Distribution, DummBagDropper, left_belt, right_belt, DebugController;
+B0 = Bag(0);
+B1 = Bag(1);
+B2 = Bag(2);
+
+system Distribution, DummBagDropper, left_belt, right_belt, DebugController,
+B0
+//,B1, B2
+
+;
+
 </system>
 	<queries>
 		<query>
-			<formula>A[] !Feed.Reverse</formula>
+			<formula>A[] not deadlock</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-02-21 16:52:07 +0100">
+			<result outcome="success" type="quality" timestamp="2024-02-28 16:52:29 +0100">
 			</result>
 		</query>
 	</queries>
