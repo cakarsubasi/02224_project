@@ -27,8 +27,8 @@ typedef int[0,1] motion_t;
 const motion_t stop = 0;
 const motion_t move = 1;
 
-const int NUM_OF_BAGS = 5;
-typedef scalar[NUM_OF_BAGS] bag_id_t;
+const int NUM_OF_BAGS = 1;
+typedef int[0, NUM_OF_BAGS-1] bag_id_t;
 int finished_bags = 0;
 
 direc_t dist_dir = right;
@@ -39,8 +39,8 @@ motion_t feed_m[2] = {move, move};
 bool sensor_on[2] = {false, false};
 int sensor_val[2] = {100, 100};
 
-//const color_t color_order[6] = {YELLOW, YELLOW, BLACK, YELLOW, BLACK, BLACK};
-//const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};
+//const color_t color_order[5] = {YELLOW, YELLOW, BLACK, YELLOW, BLACK};
+const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};
 
 direc_t side_val;</declaration>
 	<template>
@@ -843,9 +843,8 @@ sInval(left)</label>
 		<transition id="id144">
 			<source ref="id89"/>
 			<target ref="id99"/>
-			<label kind="select" x="-204" y="-425">random_color : color_t</label>
 			<label kind="synchronisation" x="-204" y="-374">place[left]?</label>
-			<label kind="assignment" x="-204" y="-408">color := random_color,
+			<label kind="assignment" x="-204" y="-408">color := color_order[id % 5],
 x := 0</label>
 		</transition>
 		<transition id="id145">
@@ -885,9 +884,8 @@ sInval(right)</label>
 		<transition id="id150">
 			<source ref="id89"/>
 			<target ref="id105"/>
-			<label kind="select" x="110" y="-425">random_color : color_t</label>
 			<label kind="synchronisation" x="110" y="-374">place[right]?</label>
-			<label kind="assignment" x="110" y="-408">color := random_color,
+			<label kind="assignment" x="110" y="-408">color := color_order[id % 5],
 x := 0</label>
 		</transition>
 		<transition id="id151">
@@ -1189,7 +1187,7 @@ dropper = SmortBagDropperEx3(NUM_OF_BAGS, right);
 
 system Bag, Distribution, feed_belt0, feed_belt1, 
 dropper,
-SingleSort;
+SingleSortEx5;
 </system>
 	<queries>
 		<option key="--diagnostic" value="1"/>
@@ -1201,6 +1199,9 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).A imply Bag(i).color == YELLOW</formula>
 			<comment>Black is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
+			<result outcome="failure" type="quality" timestamp="2024-03-20 15:11:09 +0100">
+				<option key="--diagnostic" value="1"/>
+			</result>
 		</query>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).B imply Bag(i).color == BLACK</formula>
