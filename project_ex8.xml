@@ -35,7 +35,7 @@ motion_t feed_m[2] = {move, move};
 bool sensor_on[2] = {false, false};
 int sensor_val[2] = {100, 100};
 
-const color_t color_order[6] = {YELLOW, BLACK, BLACK, BLACK, YELLOW, BLACK};
+const color_t color_order[6] = {YELLOW, BLACK, YELLOW, BLACK, YELLOW, BLACK};
 //const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};</declaration>
 	<template>
 		<name>SmortBagDropperEx8</name>
@@ -44,7 +44,8 @@ const color_t color_order[6] = {YELLOW, BLACK, BLACK, BLACK, YELLOW, BLACK};
 
 clock x;
 const int short_wait = 900;
-const int long_wait = 13200 - short_wait;</declaration>
+// change 13100 to 13101 to make the verifications pass
+const int long_wait = 13100 - short_wait;</declaration>
 		<location id="id0" x="-527" y="-289">
 			<name x="-502" y="-298">PlaceLeft</name>
 			<label kind="invariant" x="-765" y="-297">dropped_bags &lt;= max_bags &amp;&amp;
@@ -767,7 +768,7 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).A imply Bag(i).color == YELLOW</formula>
 			<comment>Black is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:05 +0100">
+			<result outcome="failure" type="quality" timestamp="2024-03-22 16:53:24 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -775,7 +776,7 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).B imply Bag(i).color == BLACK</formula>
 			<comment>Yellow is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:07 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:24 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -783,7 +784,7 @@ SingleSort;
 			<formula>A[] !deadlock or (forall (i: bag_id_t) Bag(i).EndA || Bag(i).EndB)</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:10 +0100">
+			<result outcome="failure" type="quality" timestamp="2024-03-22 16:53:25 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -799,7 +800,7 @@ SingleSort;
 			<formula>A&lt;&gt; dropper.Finished</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
+			<result outcome="failure" type="quality" timestamp="2024-03-22 16:53:27 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -828,7 +829,7 @@ SingleSort;
 imply i == j</formula>
 			<comment/>
 			<option key="--statespace-consumption" value="2"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:27 +0100">
 				<option key="--statespace-consumption" value="2"/>
 			</result>
 		</query>
@@ -839,14 +840,14 @@ imply i == j</formula>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin1 imply feed_belt0.Move</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:27 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin2 imply feed_belt1.Move</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:13 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -865,7 +866,7 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 
 </formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 			</result>
 		</query>
 		<query>
@@ -875,13 +876,13 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>SingleSort(right).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_right</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>SingleSort(left).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_left</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 			</result>
 		</query>
 		<query>
@@ -891,13 +892,13 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>A[] feed_m[left] == stop imply !(forall (i: bag_id_t) Bag(i).placed1 &amp;&amp; Bag(i).sensor_entering1 &amp;&amp; Bag(i).sensor_front1 &amp;&amp; Bag(i).sensor_exiting1 &amp;&amp; Bag(i).turning_begin1)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] feed_m[right] == stop imply !(forall (i: bag_id_t) Bag(i).placed2 &amp;&amp; Bag(i).sensor_entering2 &amp;&amp; Bag(i).sensor_front2 &amp;&amp; Bag(i).sensor_exiting2 &amp;&amp; Bag(i).turning_begin2)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:53:30 +0100">
 			</result>
 		</query>
 	</queries>
