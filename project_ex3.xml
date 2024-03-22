@@ -8,8 +8,8 @@ chan place[2];
 chan start_feed[2];
 chan stop_feed[2];
 
-urgent broadcast chan stop_bag[2];
-urgent broadcast chan move_bag[2];
+chan stop_bag[2];
+chan move_bag[2];
 
 typedef int[0,1] color_t;
 const color_t YELLOW = 0; // go left (A)
@@ -23,7 +23,7 @@ typedef int[0,1] motion_t;
 const motion_t stop = 0;
 const motion_t move = 1;
 
-const int NUM_OF_BAGS = 4; // Anything more than 5 is painfully slow
+const int NUM_OF_BAGS = 5; // Anything more than 5 is painfully slow
 typedef int[0, NUM_OF_BAGS-1] bag_id_t;
 int finished_bags = 0;
 
@@ -94,7 +94,7 @@ direc_t dest = 0;
 int done = 0;
 </declaration>
 		<location id="id6" x="-4233" y="-4419">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id7" x="-4292" y="-4326">
 			<name x="-4275" y="-4343">waiting_for_bag</name>
@@ -105,22 +105,22 @@ int done = 0;
 		</location>
 		<location id="id9" x="-4292" y="-4063">
 			<name x="-4275" y="-4088">detect_colour</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id10" x="-4292" y="-3935">
 			<name x="-4302" y="-3969">bag_to_move</name>
 			<label kind="invariant" x="-4377" y="-3935">y&lt;=2000</label>
 		</location>
 		<location id="id11" x="-4199" y="-3935">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id12" x="-3969" y="-3935">
 			<name x="-3978" y="-3917">to_swap_dir</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id13" x="-3893" y="-4428">
 			<name x="-3903" y="-4462">dist_bag</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id14" x="-3901" y="-4012">
 			<name x="-3876" y="-4029">wait_for_done</name>
@@ -128,7 +128,7 @@ int done = 0;
 		</location>
 		<location id="id15" x="-3893" y="-4165">
 			<name x="-3903" y="-4199">swapped_dir</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id16" x="-4097" y="-4436">
 			<label kind="invariant" x="-4122" y="-4428">y &lt;= 1200</label>
@@ -235,10 +235,10 @@ y := 0</label>
 			<name x="-2091" y="-1818">Move</name>
 		</location>
 		<location id="id36" x="-2023" y="-1887">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id37" x="-2116" y="-1887">
-			<committed/>
+			<urgent/>
 		</location>
 		<init ref="id35"/>
 		<transition id="id38">
@@ -266,19 +266,19 @@ y := 0</label>
 	</template>
 	<template>
 		<name>Distribution</name>
-		<location id="id42" x="-59" y="-85">
-			<name x="-42" y="-93">Right</name>
+		<location id="id42" x="-59" y="-136">
+			<name x="-42" y="-144">Right</name>
 		</location>
 		<location id="id43" x="-59" y="-272">
 			<name x="-34" y="-289">Left</name>
 		</location>
 		<location id="id44" x="0" y="-204">
 			<name x="-10" y="-238">Change2</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id45" x="-119" y="-204">
 			<name x="-179" y="-238">Change1</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<init ref="id42"/>
 		<transition id="id46">
@@ -401,7 +401,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id65" x="-153" y="34">
 			<name x="-136" y="9">pre_stop1</name>
-			<label kind="invariant" x="-127" y="26">x &lt;= 1150</label>
+			<label kind="invariant" x="-127" y="26">x &lt;= 1200</label>
 		</location>
 		<location id="id66" x="221" y="-306">
 			<name x="213" y="-340">placed2</name>
@@ -425,7 +425,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id71" x="221" y="34">
 			<name x="238" y="9">pre_stop2</name>
-			<label kind="invariant" x="238" y="34">x &lt;= 1150</label>
+			<label kind="invariant" x="238" y="34">x &lt;= 1200</label>
 		</location>
 		<location id="id72" x="-637" y="315">
 			<name x="-646" y="281">EndA</name>
@@ -435,7 +435,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id74" x="221" y="111">
 			<name x="153" y="85">point2</name>
-			<label kind="invariant" x="136" y="102">x &lt;= 1250</label>
+			<label kind="invariant" x="136" y="102">x &lt;= 1200</label>
 		</location>
 		<location id="id75" x="417" y="111">
 			<name x="442" y="102">stop_right</name>
@@ -445,13 +445,13 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id77" x="-153" y="111">
 			<name x="-136" y="102">point1</name>
-			<label kind="invariant" x="-136" y="85">x &lt;= 1250</label>
+			<label kind="invariant" x="-136" y="85">x &lt;= 1200</label>
 		</location>
 		<init ref="id50"/>
 		<transition id="id78">
 			<source ref="id77"/>
 			<target ref="id62"/>
-			<label kind="guard" x="-144" y="119">x &gt;= 1250 &amp;&amp;
+			<label kind="guard" x="-144" y="119">x &gt;= 1200 &amp;&amp;
 feed_m[left] == move</label>
 			<label kind="assignment" x="-34" y="119">x := 0</label>
 		</transition>
@@ -471,14 +471,14 @@ feed_m[left] == move</label>
 		<transition id="id81">
 			<source ref="id74"/>
 			<target ref="id68"/>
-			<label kind="guard" x="51" y="119">x &gt;= 1250 &amp;&amp;
+			<label kind="guard" x="51" y="119">x &gt;= 1200 &amp;&amp;
 feed_m[right] == move</label>
 			<label kind="assignment" x="128" y="162">x := 0</label>
 		</transition>
 		<transition id="id82">
 			<source ref="id65"/>
 			<target ref="id77"/>
-			<label kind="guard" x="-127" y="43">x == 1150</label>
+			<label kind="guard" x="-127" y="43">x == 1200</label>
 			<label kind="assignment" x="-127" y="60">x := 0</label>
 		</transition>
 		<transition id="id83">
@@ -639,7 +639,7 @@ x := 0</label>
 		<transition id="id106">
 			<source ref="id71"/>
 			<target ref="id74"/>
-			<label kind="guard" x="238" y="51">x &gt;= 1150</label>
+			<label kind="guard" x="238" y="51">x &gt;= 1200</label>
 			<label kind="assignment" x="238" y="68">x := 0</label>
 		</transition>
 		<transition id="id107">
@@ -716,7 +716,7 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).A imply Bag(i).color == YELLOW</formula>
 			<comment>Black is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:35:04 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:25 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -724,14 +724,14 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).B imply Bag(i).color == BLACK</formula>
 			<comment>Yellow is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:35:05 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:27 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>A[] !deadlock || (forall (i: bag_id_t) Bag(i).EndA || Bag(i).EndB)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:35:05 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:29 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -747,7 +747,7 @@ SingleSort;
 			<formula>A&lt;&gt; dropper.Finished</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:35:00 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:36 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -775,7 +775,7 @@ SingleSort;
 (Bag(i).turning_end2 &amp;&amp; Bag(j).turning_end2)
 imply i == j</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:09 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:40 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -786,7 +786,7 @@ imply i == j</formula>
 (Bag(i).f &amp;&amp; Bag(j).f)
 imply i == j</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:36:23 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:41 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -797,7 +797,7 @@ imply i == j</formula>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin1 imply feed_belt0.Move</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:43:26 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:43 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -805,7 +805,7 @@ imply i == j</formula>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin2 imply feed_belt1.Move</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 18:43:26 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:44 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -824,7 +824,7 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 
 </formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:13 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:46 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -835,14 +835,14 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>SingleSort(right).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_right</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:15 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:48 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>SingleSort(left).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_left</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:16 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:50 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -853,14 +853,14 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>A[] feed_m[left] == stop imply !(forall (i: bag_id_t) Bag(i).placed1 &amp;&amp; Bag(i).sensor_entering1 &amp;&amp; Bag(i).sensor_front1 &amp;&amp; Bag(i).sensor_exiting1 &amp;&amp; Bag(i).turning_begin1)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:51 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
 			<formula>A[] feed_m[right] == stop imply !(forall (i: bag_id_t) Bag(i).placed2 &amp;&amp; Bag(i).sensor_entering2 &amp;&amp; Bag(i).sensor_front2 &amp;&amp; Bag(i).sensor_exiting2 &amp;&amp; Bag(i).turning_begin2)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:02:18 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:18:53 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
