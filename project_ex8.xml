@@ -8,10 +8,8 @@ chan place[2];
 chan start_feed[2];
 chan stop_feed[2];
 
-urgent broadcast chan stop_bag[2];
-urgent broadcast chan move_bag[2];
-
-int error = 0;
+chan stop_bag[2];
+chan move_bag[2];
 
 typedef int[0,1] color_t;
 const color_t YELLOW = 0; // go left (A)
@@ -38,9 +36,7 @@ bool sensor_on[2] = {false, false};
 int sensor_val[2] = {100, 100};
 
 const color_t color_order[6] = {YELLOW, BLACK, BLACK, BLACK, YELLOW, BLACK};
-//const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};
-
-direc_t side_val;</declaration>
+//const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};</declaration>
 	<template>
 		<name>SmortBagDropperEx8</name>
 		<parameter>int max_bags, direc_t start</parameter>
@@ -149,7 +145,7 @@ direc_t dest = 0;
 int done = 0;
 </declaration>
 		<location id="id15" x="-4233" y="-4419">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id16" x="-4292" y="-4326">
 			<name x="-4275" y="-4343">waiting_for_bag</name>
@@ -160,22 +156,22 @@ int done = 0;
 		</location>
 		<location id="id18" x="-4292" y="-4063">
 			<name x="-4275" y="-4088">detect_colour</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id19" x="-4292" y="-3935">
 			<name x="-4302" y="-3969">bag_to_move</name>
 			<label kind="invariant" x="-4377" y="-3935">y&lt;=2000</label>
 		</location>
 		<location id="id20" x="-4199" y="-3935">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id21" x="-3969" y="-3935">
 			<name x="-3978" y="-3917">to_swap_dir</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id22" x="-3893" y="-4428">
 			<name x="-3903" y="-4462">dist_bag</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id23" x="-3901" y="-4012">
 			<name x="-3876" y="-4029">wait_for_done</name>
@@ -183,7 +179,7 @@ int done = 0;
 		</location>
 		<location id="id24" x="-3884" y="-4156">
 			<name x="-3894" y="-4190">swapped_dir</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id25" x="-4097" y="-4436">
 			<label kind="invariant" x="-4122" y="-4428">y &lt;= 1200</label>
@@ -290,10 +286,10 @@ y := 0</label>
 			<name x="-2082" y="-1801">Move</name>
 		</location>
 		<location id="id45" x="-2023" y="-1887">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id46" x="-2116" y="-1887">
-			<committed/>
+			<urgent/>
 		</location>
 		<init ref="id44"/>
 		<transition id="id47">
@@ -329,11 +325,11 @@ y := 0</label>
 		</location>
 		<location id="id53" x="34" y="-204">
 			<name x="24" y="-238">Change2</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id54" x="-102" y="-204">
 			<name x="-162" y="-238">Change1</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<init ref="id51"/>
 		<transition id="id55">
@@ -456,7 +452,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id74" x="-153" y="33">
 			<name x="-136" y="8">pre_stop1</name>
-			<label kind="invariant" x="-127" y="25">x &lt;= 1150</label>
+			<label kind="invariant" x="-127" y="25">x &lt;= 1200</label>
 		</location>
 		<location id="id75" x="221" y="-306">
 			<name x="213" y="-340">placed2</name>
@@ -480,7 +476,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id80" x="221" y="42">
 			<name x="238" y="17">pre_stop2</name>
-			<label kind="invariant" x="238" y="33">x &lt;= 1150</label>
+			<label kind="invariant" x="238" y="33">x &lt;= 1200</label>
 		</location>
 		<location id="id81" x="-637" y="314">
 			<name x="-647" y="280">EndA</name>
@@ -490,7 +486,7 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id83" x="221" y="110">
 			<name x="144" y="76">point2</name>
-			<label kind="invariant" x="127" y="93">x &lt;= 1250</label>
+			<label kind="invariant" x="127" y="93">x &lt;= 1200</label>
 		</location>
 		<location id="id84" x="416" y="110">
 			<name x="442" y="102">stop_right</name>
@@ -500,13 +496,13 @@ void sRes(direc_t side) {
 		</location>
 		<location id="id86" x="-153" y="110">
 			<name x="-136" y="102">point1</name>
-			<label kind="invariant" x="-136" y="85">x &lt;= 1250</label>
+			<label kind="invariant" x="-136" y="85">x &lt;= 1200</label>
 		</location>
 		<init ref="id59"/>
 		<transition id="id87">
 			<source ref="id86"/>
 			<target ref="id71"/>
-			<label kind="guard" x="-144" y="119">x &gt;= 1250 &amp;&amp;
+			<label kind="guard" x="-144" y="119">x &gt;= 1200 &amp;&amp;
 feed_m[left] == move</label>
 			<label kind="assignment" x="-34" y="119">x := 0</label>
 		</transition>
@@ -526,14 +522,14 @@ feed_m[left] == move</label>
 		<transition id="id90">
 			<source ref="id83"/>
 			<target ref="id77"/>
-			<label kind="guard" x="51" y="119">x &gt;= 1250 &amp;&amp;
+			<label kind="guard" x="51" y="119">x &gt;= 1200 &amp;&amp;
 feed_m[right] == move</label>
 			<label kind="assignment" x="119" y="161">x := 0</label>
 		</transition>
 		<transition id="id91">
 			<source ref="id74"/>
 			<target ref="id86"/>
-			<label kind="guard" x="-127" y="42">x == 1150</label>
+			<label kind="guard" x="-127" y="42">x == 1200</label>
 			<label kind="assignment" x="-187" y="50">x := 0</label>
 		</transition>
 		<transition id="id92">
@@ -695,7 +691,7 @@ x := 0</label>
 		<transition id="id115">
 			<source ref="id80"/>
 			<target ref="id83"/>
-			<label kind="guard" x="238" y="51">x &gt;= 1150</label>
+			<label kind="guard" x="238" y="51">x &gt;= 1200</label>
 			<label kind="assignment" x="246" y="85">x := 0</label>
 		</transition>
 		<transition id="id116">
@@ -771,7 +767,7 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).A imply Bag(i).color == YELLOW</formula>
 			<comment>Black is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:15:45 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:05 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -779,7 +775,7 @@ SingleSort;
 			<formula>A[] forall (i: bag_id_t) Bag(i).B imply Bag(i).color == BLACK</formula>
 			<comment>Yellow is not sorted incorrectly</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:15:46 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:07 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -787,7 +783,7 @@ SingleSort;
 			<formula>A[] !deadlock or (forall (i: bag_id_t) Bag(i).EndA || Bag(i).EndB)</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:44 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:10 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -803,7 +799,7 @@ SingleSort;
 			<formula>A&lt;&gt; dropper.Finished</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:49 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -832,7 +828,7 @@ SingleSort;
 imply i == j</formula>
 			<comment/>
 			<option key="--statespace-consumption" value="2"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:50 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
 				<option key="--statespace-consumption" value="2"/>
 			</result>
 		</query>
@@ -843,14 +839,14 @@ imply i == j</formula>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin1 imply feed_belt0.Move</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:50 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:11 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] forall (i: bag_id_t) Bag(i).turning_begin2 imply feed_belt1.Move</formula>
 			<comment/>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:13 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -869,7 +865,7 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 
 </formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
 			</result>
 		</query>
 		<query>
@@ -879,13 +875,13 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>SingleSort(right).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_right</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>SingleSort(left).wait_for_done --&gt; exists (i: bag_id_t) Bag(i).stop_left</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
 			</result>
 		</query>
 		<query>
@@ -895,13 +891,13 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>A[] feed_m[left] == stop imply !(forall (i: bag_id_t) Bag(i).placed1 &amp;&amp; Bag(i).sensor_entering1 &amp;&amp; Bag(i).sensor_front1 &amp;&amp; Bag(i).sensor_exiting1 &amp;&amp; Bag(i).turning_begin1)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] feed_m[right] == stop imply !(forall (i: bag_id_t) Bag(i).placed2 &amp;&amp; Bag(i).sensor_entering2 &amp;&amp; Bag(i).sensor_front2 &amp;&amp; Bag(i).sensor_exiting2 &amp;&amp; Bag(i).turning_begin2)</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-21 19:16:52 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 16:26:14 +0100">
 			</result>
 		</query>
 	</queries>
