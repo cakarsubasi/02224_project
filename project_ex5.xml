@@ -11,10 +11,6 @@ chan stop_feed[2];
 urgent broadcast chan stop_bag[2];
 urgent broadcast chan move_bag[2];
 
-chan unlock;
-
-int error = 0;
-
 typedef int[0,1] color_t;
 const color_t YELLOW = 0; // go left (A)
 const color_t BLACK = 1; // go right (B)
@@ -40,9 +36,7 @@ bool sensor_on[2] = {false, false};
 int sensor_val[2] = {100, 100};
 
 //const color_t color_order[5] = {YELLOW, YELLOW, BLACK, YELLOW, BLACK};
-const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};
-
-direc_t side_val;</declaration>
+const color_t color_order[5] = {BLACK, YELLOW, BLACK, YELLOW, BLACK};</declaration>
 	<template>
 		<name>SmortBagDropperEx3</name>
 		<parameter>int max_bags, direc_t side</parameter>
@@ -107,197 +101,6 @@ x := 0</label>
 		</transition>
 	</template>
 	<template>
-		<name>SmortBagDropperEx4</name>
-		<parameter>int max_bags</parameter>
-		<declaration>int dropped_bags = 0;
-
-clock x;</declaration>
-		<location id="id9" x="-450" y="-246">
-			<label kind="invariant" x="-527" y="-297">dropped_bags &lt;= max_bags</label>
-		</location>
-		<location id="id10" x="-357" y="-102">
-			<name x="-348" y="-136">Finished</name>
-		</location>
-		<location id="id11" x="-17" y="-365">
-			<name x="-27" y="-399">impossible</name>
-			<label kind="invariant" x="-27" y="-348">false</label>
-		</location>
-		<location id="id12" x="-542" y="-399">
-			<name x="-552" y="-433">Wait</name>
-			<label kind="invariant" x="-552" y="-382">x &lt;= 1000</label>
-		</location>
-		<init ref="id9"/>
-		<transition id="id13">
-			<source ref="id12"/>
-			<target ref="id9"/>
-			<label kind="guard" x="-524" y="-356">x &gt;= 1000</label>
-			<label kind="assignment" x="-526" y="-327">x := 0</label>
-		</transition>
-		<transition id="id14">
-			<source ref="id9"/>
-			<target ref="id10"/>
-			<label kind="guard" x="-425" y="-195">dropped_bags == max_bags &amp;&amp; finished_bags == max_bags</label>
-		</transition>
-		<transition id="id15">
-			<source ref="id9"/>
-			<target ref="id12"/>
-			<label kind="guard" x="-680" y="-238">sensor_on[right]</label>
-			<label kind="synchronisation" x="-671" y="-221">place[right]!</label>
-			<label kind="assignment" x="-731" y="-195">dropped_bags := dropped_bags + 1,
-x := 0</label>
-			<nail x="-586" y="-271"/>
-		</transition>
-		<transition id="id16">
-			<source ref="id9"/>
-			<target ref="id12"/>
-			<label kind="guard" x="-373" y="-335">sensor_on[left]</label>
-			<label kind="synchronisation" x="-348" y="-314">place[left]!</label>
-			<label kind="assignment" x="-348" y="-280">dropped_bags := dropped_bags + 1,
-x := 0</label>
-			<nail x="-391" y="-373"/>
-		</transition>
-	</template>
-	<template>
-		<name>SingleSort</name>
-		<parameter>direc_t side</parameter>
-		<declaration>clock y;
-clock sys;
-int sensor_val_local;
-direc_t dest = 0; 
-int done = 0;
-</declaration>
-		<location id="id17" x="-4233" y="-4419">
-			<committed/>
-		</location>
-		<location id="id18" x="-4292" y="-4326">
-			<name x="-4275" y="-4343">waiting_for_bag</name>
-		</location>
-		<location id="id19" x="-4292" y="-4190">
-			<name x="-4267" y="-4208">wait_for_correct_colour</name>
-			<label kind="invariant" x="-4377" y="-4199">y &lt;= 800</label>
-		</location>
-		<location id="id20" x="-4292" y="-4063">
-			<name x="-4275" y="-4088">detect_colour</name>
-			<committed/>
-		</location>
-		<location id="id21" x="-4292" y="-3935">
-			<name x="-4302" y="-3969">bag_to_move</name>
-			<label kind="invariant" x="-4377" y="-3935">y&lt;=2000</label>
-		</location>
-		<location id="id22" x="-4199" y="-3935">
-			<committed/>
-		</location>
-		<location id="id23" x="-3969" y="-3935">
-			<name x="-3978" y="-3917">to_swap_dir</name>
-			<committed/>
-		</location>
-		<location id="id24" x="-3893" y="-4428">
-			<name x="-3903" y="-4462">dist_bag</name>
-			<committed/>
-		</location>
-		<location id="id25" x="-3901" y="-4012">
-			<name x="-3876" y="-4029">wait_for_done</name>
-			<label kind="invariant" x="-3876" y="-4012">sys &lt;= done</label>
-		</location>
-		<location id="id26" x="-3893" y="-4165">
-			<name x="-3903" y="-4199">swapped_dir</name>
-		</location>
-		<location id="id27" x="-4097" y="-4436">
-			<label kind="invariant" x="-4122" y="-4428">y &lt;= 1200</label>
-		</location>
-		<location id="id28" x="-4318" y="-4496">
-			<committed/>
-		</location>
-		<location id="id29" x="-3978" y="-4131">
-			<name x="-3995" y="-4165">no_swap</name>
-			<committed/>
-		</location>
-		<init ref="id28"/>
-		<transition id="id30">
-			<source ref="id23"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-3986" y="-4037">sys &gt; done</label>
-			<label kind="synchronisation" x="-3995" y="-4020">dist_swap!</label>
-			<nail x="-3927" y="-4063"/>
-		</transition>
-		<transition id="id31">
-			<source ref="id29"/>
-			<target ref="id24"/>
-		</transition>
-		<transition id="id32">
-			<source ref="id28"/>
-			<target ref="id17"/>
-		</transition>
-		<transition id="id33">
-			<source ref="id27"/>
-			<target ref="id17"/>
-			<label kind="guard" x="-4199" y="-4454">y == 1200</label>
-		</transition>
-		<transition id="id34">
-			<source ref="id26"/>
-			<target ref="id24"/>
-			<label kind="synchronisation" x="-3884" y="-4250">start_feed[side]!</label>
-		</transition>
-		<transition id="id35">
-			<source ref="id25"/>
-			<target ref="id26"/>
-			<label kind="guard" x="-3884" y="-4105">sys &gt;= done</label>
-			<label kind="synchronisation" x="-3884" y="-4088">dist_swap!</label>
-		</transition>
-		<transition id="id36">
-			<source ref="id23"/>
-			<target ref="id25"/>
-			<label kind="synchronisation" x="-3935" y="-3969">stop_feed[side]!</label>
-		</transition>
-		<transition id="id37">
-			<source ref="id22"/>
-			<target ref="id23"/>
-			<label kind="guard" x="-4139" y="-3935">dest != dist_dir</label>
-		</transition>
-		<transition id="id38">
-			<source ref="id24"/>
-			<target ref="id27"/>
-			<label kind="assignment" x="-4071" y="-4513">done := 6000 + 
-6000*abs(dist_dir-side),
-sys := 0, y := 0</label>
-		</transition>
-		<transition id="id39">
-			<source ref="id22"/>
-			<target ref="id29"/>
-			<label kind="guard" x="-4173" y="-4029">dest == dist_dir</label>
-			<nail x="-4037" y="-4012"/>
-		</transition>
-		<transition id="id40">
-			<source ref="id21"/>
-			<target ref="id22"/>
-			<label kind="guard" x="-4292" y="-3918">y == 2000</label>
-		</transition>
-		<transition id="id41">
-			<source ref="id20"/>
-			<target ref="id21"/>
-			<label kind="assignment" x="-4539" y="-4037">dest := sensor_val_local&lt;=48,
-sensor_on[side] := false,
-y := 0</label>
-		</transition>
-		<transition id="id42">
-			<source ref="id19"/>
-			<target ref="id20"/>
-			<label kind="guard" x="-4369" y="-4156">y == 800</label>
-			<label kind="assignment" x="-4411" y="-4139">sensor_val_local := sensor_val[side]</label>
-		</transition>
-		<transition id="id43">
-			<source ref="id18"/>
-			<target ref="id19"/>
-			<label kind="synchronisation" x="-4377" y="-4284">bag[side]?</label>
-			<label kind="assignment" x="-4343" y="-4267">y := 0</label>
-		</transition>
-		<transition id="id44">
-			<source ref="id17"/>
-			<target ref="id18"/>
-			<label kind="assignment" x="-4360" y="-4386">sensor_on[side]:= true</label>
-		</transition>
-	</template>
-	<template>
 		<name>SingleSortEx5</name>
 		<parameter>direc_t side</parameter>
 		<declaration>clock y;
@@ -306,210 +109,211 @@ int sensor_val_local;
 direc_t dest = 0; 
 int done = 0;
 </declaration>
-		<location id="id45" x="-4233" y="-4419">
+		<location id="id9" x="-4233" y="-4419">
 			<committed/>
 		</location>
-		<location id="id46" x="-4292" y="-4326">
+		<location id="id10" x="-4292" y="-4326">
 			<name x="-4275" y="-4343">waiting_for_bag</name>
 		</location>
-		<location id="id47" x="-4292" y="-4190">
+		<location id="id11" x="-4292" y="-4190">
 			<name x="-4267" y="-4208">dont_wait_for_correct_colour</name>
 			<label kind="invariant" x="-4377" y="-4190">y &lt;= 1500</label>
 		</location>
-		<location id="id48" x="-4292" y="-4063">
+		<location id="id12" x="-4292" y="-4063">
 			<name x="-4275" y="-4088">detect_colour</name>
 			<committed/>
 		</location>
-		<location id="id49" x="-4292" y="-3935">
+		<location id="id13" x="-4292" y="-3935">
 			<name x="-4302" y="-3969">bag_to_move</name>
 			<label kind="invariant" x="-4377" y="-3944">y&lt;=1300</label>
 		</location>
-		<location id="id50" x="-4199" y="-3935">
+		<location id="id14" x="-4199" y="-3935">
 			<committed/>
 		</location>
-		<location id="id51" x="-3969" y="-3935">
+		<location id="id15" x="-3969" y="-3935">
 			<name x="-3978" y="-3917">to_swap_dir</name>
 			<committed/>
 		</location>
-		<location id="id52" x="-3893" y="-4428">
+		<location id="id16" x="-3893" y="-4428">
 			<name x="-3903" y="-4462">dist_bag</name>
 			<committed/>
 		</location>
-		<location id="id53" x="-3901" y="-4012">
+		<location id="id17" x="-3901" y="-4012">
 			<name x="-3876" y="-4029">wait_for_done</name>
 			<label kind="invariant" x="-3876" y="-4012">sys &lt;= done</label>
 		</location>
-		<location id="id54" x="-3893" y="-4165">
+		<location id="id18" x="-3893" y="-4165">
 			<name x="-3903" y="-4199">swapped_dir</name>
-		</location>
-		<location id="id55" x="-4097" y="-4436">
-			<label kind="invariant" x="-4131" y="-4420">y &lt;= 1200</label>
-		</location>
-		<location id="id56" x="-4318" y="-4496">
 			<committed/>
 		</location>
-		<location id="id57" x="-3995" y="-4105">
+		<location id="id19" x="-4097" y="-4436">
+			<label kind="invariant" x="-4131" y="-4420">y &lt;= 1200</label>
+		</location>
+		<location id="id20" x="-4318" y="-4496">
+			<committed/>
+		</location>
+		<location id="id21" x="-3995" y="-4105">
 			<name x="-4012" y="-4139">no_swap</name>
 			<committed/>
 		</location>
-		<init ref="id56"/>
-		<transition id="id58">
-			<source ref="id51"/>
-			<target ref="id52"/>
+		<init ref="id20"/>
+		<transition id="id22">
+			<source ref="id15"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-3995" y="-4046">sys &gt; done</label>
 			<label kind="synchronisation" x="-3995" y="-4029">dist_swap!</label>
 		</transition>
-		<transition id="id59">
-			<source ref="id57"/>
-			<target ref="id52"/>
+		<transition id="id23">
+			<source ref="id21"/>
+			<target ref="id16"/>
 		</transition>
-		<transition id="id60">
-			<source ref="id56"/>
-			<target ref="id45"/>
+		<transition id="id24">
+			<source ref="id20"/>
+			<target ref="id9"/>
 		</transition>
-		<transition id="id61">
-			<source ref="id55"/>
-			<target ref="id45"/>
+		<transition id="id25">
+			<source ref="id19"/>
+			<target ref="id9"/>
 			<label kind="guard" x="-4199" y="-4454">y == 1200</label>
 		</transition>
-		<transition id="id62">
-			<source ref="id54"/>
-			<target ref="id52"/>
+		<transition id="id26">
+			<source ref="id18"/>
+			<target ref="id16"/>
 			<label kind="synchronisation" x="-3884" y="-4250">start_feed[side]!</label>
 		</transition>
-		<transition id="id63">
-			<source ref="id53"/>
-			<target ref="id54"/>
+		<transition id="id27">
+			<source ref="id17"/>
+			<target ref="id18"/>
 			<label kind="guard" x="-3884" y="-4114">sys &gt;= done</label>
 			<label kind="synchronisation" x="-3884" y="-4088">dist_swap!</label>
 		</transition>
-		<transition id="id64">
-			<source ref="id51"/>
-			<target ref="id53"/>
+		<transition id="id28">
+			<source ref="id15"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="-3935" y="-3969">stop_feed[side]!</label>
 		</transition>
-		<transition id="id65">
-			<source ref="id50"/>
-			<target ref="id51"/>
+		<transition id="id29">
+			<source ref="id14"/>
+			<target ref="id15"/>
 			<label kind="guard" x="-4139" y="-3935">dest != dist_dir</label>
 			<label kind="assignment" x="-4105" y="-3910">y := 0</label>
 		</transition>
-		<transition id="id66">
-			<source ref="id52"/>
-			<target ref="id55"/>
+		<transition id="id30">
+			<source ref="id16"/>
+			<target ref="id19"/>
 			<label kind="assignment" x="-4071" y="-4505">done := 6000 + 
 6000*abs(dist_dir-side),
 sys := 0, y := 0</label>
 		</transition>
-		<transition id="id67">
-			<source ref="id50"/>
-			<target ref="id57"/>
+		<transition id="id31">
+			<source ref="id14"/>
+			<target ref="id21"/>
 			<label kind="guard" x="-4173" y="-4037">dest == dist_dir</label>
 			<nail x="-4037" y="-4020"/>
 		</transition>
-		<transition id="id68">
-			<source ref="id49"/>
-			<target ref="id50"/>
+		<transition id="id32">
+			<source ref="id13"/>
+			<target ref="id14"/>
 			<label kind="guard" x="-4284" y="-3927">y == 1300</label>
 		</transition>
-		<transition id="id69">
-			<source ref="id48"/>
-			<target ref="id49"/>
+		<transition id="id33">
+			<source ref="id12"/>
+			<target ref="id13"/>
 			<label kind="assignment" x="-4522" y="-4037">dest := sensor_val_local&lt;=48,
 sensor_on[side] := false,
 y := 0</label>
 		</transition>
-		<transition id="id70">
-			<source ref="id47"/>
-			<target ref="id48"/>
+		<transition id="id34">
+			<source ref="id11"/>
+			<target ref="id12"/>
 			<label kind="guard" x="-4360" y="-4156">y == 1500</label>
 			<label kind="assignment" x="-4428" y="-4122">sensor_val_local := sensor_val[side]</label>
 		</transition>
-		<transition id="id71">
-			<source ref="id46"/>
-			<target ref="id47"/>
+		<transition id="id35">
+			<source ref="id10"/>
+			<target ref="id11"/>
 			<label kind="synchronisation" x="-4377" y="-4284">bag[side]?</label>
 			<label kind="assignment" x="-4343" y="-4267">y := 0</label>
 		</transition>
-		<transition id="id72">
-			<source ref="id45"/>
-			<target ref="id46"/>
+		<transition id="id36">
+			<source ref="id9"/>
+			<target ref="id10"/>
 			<label kind="assignment" x="-4360" y="-4386">sensor_on[side]:= true</label>
 		</transition>
 	</template>
 	<template>
 		<name>Feed</name>
 		<parameter>direc_t side</parameter>
-		<location id="id73" x="-2074" y="-1937">
+		<location id="id37" x="-2074" y="-1937">
 			<name x="-2084" y="-1971">Stop</name>
 		</location>
-		<location id="id74" x="-2074" y="-1827">
+		<location id="id38" x="-2074" y="-1827">
 			<name x="-2091" y="-1818">Move</name>
 		</location>
-		<location id="id75" x="-2023" y="-1887">
+		<location id="id39" x="-2023" y="-1887">
 			<committed/>
 		</location>
-		<location id="id76" x="-2116" y="-1887">
+		<location id="id40" x="-2116" y="-1887">
 			<committed/>
 		</location>
-		<init ref="id74"/>
-		<transition id="id77">
-			<source ref="id76"/>
-			<target ref="id73"/>
+		<init ref="id38"/>
+		<transition id="id41">
+			<source ref="id40"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="-2218" y="-1929">stop_bag[side]!</label>
 		</transition>
-		<transition id="id78">
-			<source ref="id75"/>
-			<target ref="id74"/>
+		<transition id="id42">
+			<source ref="id39"/>
+			<target ref="id38"/>
 			<label kind="synchronisation" x="-2031" y="-1853">move_bag[side]!</label>
 		</transition>
-		<transition id="id79">
-			<source ref="id74"/>
-			<target ref="id76"/>
+		<transition id="id43">
+			<source ref="id38"/>
+			<target ref="id40"/>
 			<label kind="synchronisation" x="-2252" y="-1861">stop_feed[side]?</label>
 			<label kind="assignment" x="-2261" y="-1844">feed_m[side] := stop</label>
 		</transition>
-		<transition id="id80">
-			<source ref="id73"/>
-			<target ref="id75"/>
+		<transition id="id44">
+			<source ref="id37"/>
+			<target ref="id39"/>
 			<label kind="synchronisation" x="-2031" y="-1938">start_feed[side]?</label>
 			<label kind="assignment" x="-2023" y="-1921">feed_m[side] := move</label>
 		</transition>
 	</template>
 	<template>
 		<name>Distribution</name>
-		<location id="id81" x="-59" y="-85">
+		<location id="id45" x="-59" y="-85">
 			<name x="-42" y="-93">Right</name>
 		</location>
-		<location id="id82" x="-59" y="-272">
+		<location id="id46" x="-59" y="-272">
 			<name x="-34" y="-289">Left</name>
 		</location>
-		<location id="id83" x="0" y="-204">
+		<location id="id47" x="0" y="-204">
 			<name x="-10" y="-238">Change2</name>
 			<committed/>
 		</location>
-		<location id="id84" x="-119" y="-204">
+		<location id="id48" x="-119" y="-204">
 			<name x="-179" y="-238">Change1</name>
 			<committed/>
 		</location>
-		<init ref="id81"/>
-		<transition id="id85">
-			<source ref="id83"/>
-			<target ref="id81"/>
+		<init ref="id45"/>
+		<transition id="id49">
+			<source ref="id47"/>
+			<target ref="id45"/>
 		</transition>
-		<transition id="id86">
-			<source ref="id84"/>
-			<target ref="id82"/>
+		<transition id="id50">
+			<source ref="id48"/>
+			<target ref="id46"/>
 		</transition>
-		<transition id="id87">
-			<source ref="id81"/>
-			<target ref="id84"/>
+		<transition id="id51">
+			<source ref="id45"/>
+			<target ref="id48"/>
 			<label kind="synchronisation" x="-178" y="-178">dist_swap?</label>
 			<label kind="assignment" x="-221" y="-161">dist_dir := left</label>
 		</transition>
-		<transition id="id88">
-			<source ref="id82"/>
-			<target ref="id83"/>
+		<transition id="id52">
+			<source ref="id46"/>
+			<target ref="id47"/>
 			<label kind="synchronisation" x="8" y="-144">dist_swap?</label>
 			<label kind="assignment" x="-17" y="-127">dist_dir := right</label>
 		</transition>
@@ -552,629 +356,354 @@ void sRes(direc_t side) {
         sensor_val[side] = fint(uniform * 30 + 70);
     }
 }</declaration>
-		<location id="id89" x="34" y="-383">
+		<location id="id53" x="34" y="-383">
 			<name x="8" y="-426">Start</name>
 		</location>
-		<location id="id90" x="544" y="280">
+		<location id="id54" x="544" y="280">
 			<name x="534" y="246">B</name>
 			<urgent/>
 		</location>
-		<location id="id91" x="-510" y="314">
+		<location id="id55" x="-510" y="314">
 			<name x="-520" y="280">A</name>
 			<urgent/>
 		</location>
-		<location id="id92" x="-212" y="263">
+		<location id="id56" x="-212" y="263">
 			<name x="-195" y="246">turning_end1</name>
 			<committed/>
 		</location>
-		<location id="id93" x="289" y="246">
+		<location id="id57" x="289" y="246">
 			<name x="314" y="238">turning_end2</name>
 			<committed/>
 		</location>
-		<location id="id94" x="425" y="365">
+		<location id="id58" x="425" y="365">
 			<name x="415" y="331">e2</name>
 			<label kind="invariant" x="415" y="382">x&lt;=1200</label>
 		</location>
-		<location id="id95" x="272" y="365">
+		<location id="id59" x="272" y="365">
 			<name x="262" y="331">d2</name>
 			<label kind="invariant" x="262" y="382">x&lt;=2300</label>
 		</location>
-		<location id="id96" x="59" y="374">
+		<location id="id60" x="59" y="374">
 			<name x="49" y="340">f</name>
 			<label kind="invariant" x="49" y="391">x&lt;=3100</label>
 		</location>
-		<location id="id97" x="-195" y="357">
+		<location id="id61" x="-195" y="357">
 			<name x="-205" y="323">d1</name>
 			<label kind="invariant" x="-205" y="374">x&lt;=2300</label>
 		</location>
-		<location id="id98" x="-374" y="357">
+		<location id="id62" x="-374" y="357">
 			<name x="-384" y="323">e1</name>
 			<label kind="invariant" x="-384" y="374">x&lt;=1200</label>
 		</location>
-		<location id="id99" x="-153" y="-306">
+		<location id="id63" x="-153" y="-306">
 			<name x="-161" y="-340">placed1</name>
 			<urgent/>
 		</location>
-		<location id="id100" x="-153" y="-238">
+		<location id="id64" x="-153" y="-238">
 			<name x="-136" y="-255">sensor_entering1</name>
 			<label kind="invariant" x="-76" y="-238">x &lt;= 200</label>
 		</location>
-		<location id="id101" x="-153" y="178">
+		<location id="id65" x="-153" y="178">
 			<name x="-144" y="153">turning_begin1</name>
 			<label kind="invariant" x="-136" y="170">x &lt;= 2700</label>
 		</location>
-		<location id="id102" x="-153" y="-153">
+		<location id="id66" x="-153" y="-153">
 			<name x="-136" y="-170">sensor_front1</name>
 			<label kind="invariant" x="-119" y="-153">x &lt;= 1200</label>
 		</location>
-		<location id="id103" x="-153" y="-59">
+		<location id="id67" x="-153" y="-59">
 			<name x="-136" y="-76">sensor_exiting1</name>
 			<label kind="invariant" x="-127" y="-60">x &lt;= 200</label>
 		</location>
-		<location id="id104" x="-153" y="33">
+		<location id="id68" x="-153" y="33">
 			<name x="-136" y="8">pre_stop1</name>
 			<label kind="invariant" x="-136" y="24">x &lt;= 1000</label>
 		</location>
-		<location id="id105" x="221" y="-306">
+		<location id="id69" x="221" y="-306">
 			<name x="213" y="-340">placed2</name>
 			<urgent/>
 		</location>
-		<location id="id106" x="221" y="-238">
+		<location id="id70" x="221" y="-238">
 			<name x="238" y="-255">sensor_entering2</name>
 			<label kind="invariant" x="264" y="-238">x &lt;=200</label>
 		</location>
-		<location id="id107" x="221" y="178">
+		<location id="id71" x="221" y="178">
 			<name x="238" y="153">turning_begin2</name>
 			<label kind="invariant" x="238" y="170">x &lt;= 2700</label>
 		</location>
-		<location id="id108" x="221" y="-145">
+		<location id="id72" x="221" y="-145">
 			<name x="238" y="-162">sensor_front2</name>
 			<label kind="invariant" x="255" y="-145">x &lt;= 1200</label>
 		</location>
-		<location id="id109" x="221" y="-51">
+		<location id="id73" x="221" y="-51">
 			<name x="238" y="-68">sensor_exiting2</name>
 			<label kind="invariant" x="264" y="-51">x &lt;= 200</label>
 		</location>
-		<location id="id110" x="221" y="42">
+		<location id="id74" x="221" y="42">
 			<name x="238" y="17">pre_stop2</name>
 			<label kind="invariant" x="238" y="33">x &lt;= 1000</label>
 		</location>
-		<location id="id111" x="-637" y="314">
+		<location id="id75" x="-637" y="314">
 			<name x="-647" y="280">EndA</name>
 		</location>
-		<location id="id112" x="799" y="280">
+		<location id="id76" x="799" y="280">
 			<name x="789" y="246">EndB</name>
 		</location>
-		<location id="id113" x="221" y="110">
+		<location id="id77" x="221" y="110">
 			<name x="144" y="76">point2</name>
 			<label kind="invariant" x="127" y="93">x &lt;= 1400</label>
 		</location>
-		<location id="id114" x="416" y="110">
+		<location id="id78" x="416" y="110">
 			<name x="442" y="102">stop_right</name>
 		</location>
-		<location id="id115" x="-357" y="110">
+		<location id="id79" x="-357" y="110">
 			<name x="-442" y="76">stop_left</name>
 		</location>
-		<location id="id116" x="-153" y="110">
+		<location id="id80" x="-153" y="110">
 			<name x="-136" y="102">point1</name>
 			<label kind="invariant" x="-136" y="85">x &lt;= 1400</label>
 		</location>
-		<init ref="id89"/>
-		<transition id="id117">
-			<source ref="id116"/>
-			<target ref="id101"/>
+		<init ref="id53"/>
+		<transition id="id81">
+			<source ref="id80"/>
+			<target ref="id65"/>
 			<label kind="guard" x="-144" y="119">x &gt;= 1400 &amp;&amp;
 feed_m[left] == move</label>
 		</transition>
-		<transition id="id118">
-			<source ref="id114"/>
-			<target ref="id113"/>
+		<transition id="id82">
+			<source ref="id78"/>
+			<target ref="id77"/>
 			<label kind="synchronisation" x="306" y="135">move_bag[right]?</label>
 			<label kind="assignment" x="246" y="127">x := 0</label>
 			<nail x="365" y="144"/>
 		</transition>
-		<transition id="id119">
-			<source ref="id113"/>
-			<target ref="id114"/>
+		<transition id="id83">
+			<source ref="id77"/>
+			<target ref="id78"/>
 			<label kind="guard" x="331" y="76">feed_m[right] == stop</label>
 			<label kind="synchronisation" x="348" y="59">stop_bag[right]?</label>
 		</transition>
-		<transition id="id120">
-			<source ref="id113"/>
-			<target ref="id107"/>
+		<transition id="id84">
+			<source ref="id77"/>
+			<target ref="id71"/>
 			<label kind="guard" x="51" y="119">x &gt;= 1400 &amp;&amp;
 feed_m[right] == move</label>
 		</transition>
-		<transition id="id121">
-			<source ref="id104"/>
-			<target ref="id116"/>
+		<transition id="id85">
+			<source ref="id68"/>
+			<target ref="id80"/>
 			<label kind="guard" x="-127" y="51">x == 1000</label>
 			<label kind="assignment" x="-187" y="50">x := 0</label>
 		</transition>
-		<transition id="id122">
-			<source ref="id107"/>
-			<target ref="id93"/>
+		<transition id="id86">
+			<source ref="id71"/>
+			<target ref="id57"/>
 			<label kind="guard" x="272" y="195">x &gt;= 2400</label>
 			<label kind="assignment" x="280" y="212">x := 0</label>
 		</transition>
-		<transition id="id123">
-			<source ref="id98"/>
-			<target ref="id97"/>
+		<transition id="id87">
+			<source ref="id62"/>
+			<target ref="id61"/>
 			<label kind="guard" x="-340" y="314">dist_dir == right
 &amp;&amp; x&gt;=1000</label>
 			<label kind="assignment" x="-323" y="348">x:=0</label>
 			<nail x="-280" y="331"/>
 		</transition>
-		<transition id="id124">
-			<source ref="id95"/>
-			<target ref="id96"/>
+		<transition id="id88">
+			<source ref="id59"/>
+			<target ref="id60"/>
 			<label kind="guard" x="119" y="399">dist_dir==left
 &amp;&amp; x&gt;=2200</label>
 			<label kind="assignment" x="136" y="433">x:=0</label>
 			<nail x="170" y="399"/>
 		</transition>
-		<transition id="id125">
-			<source ref="id93"/>
-			<target ref="id96"/>
+		<transition id="id89">
+			<source ref="id57"/>
+			<target ref="id60"/>
 			<label kind="guard" x="127" y="280">dist_dir == left</label>
 		</transition>
-		<transition id="id126">
-			<source ref="id92"/>
-			<target ref="id96"/>
+		<transition id="id90">
+			<source ref="id56"/>
+			<target ref="id60"/>
 			<label kind="guard" x="-178" y="263">dist_dir == right</label>
 		</transition>
-		<transition id="id127">
-			<source ref="id92"/>
-			<target ref="id98"/>
+		<transition id="id91">
+			<source ref="id56"/>
+			<target ref="id62"/>
 			<label kind="guard" x="-391" y="263">dist_dir == left</label>
 		</transition>
-		<transition id="id128">
-			<source ref="id90"/>
-			<target ref="id112"/>
+		<transition id="id92">
+			<source ref="id54"/>
+			<target ref="id76"/>
 			<label kind="guard" x="612" y="246">color == BLACK</label>
 			<label kind="assignment" x="562" y="280">finished_bags := finished_bags + 1</label>
 		</transition>
-		<transition id="id129">
-			<source ref="id91"/>
-			<target ref="id111"/>
+		<transition id="id93">
+			<source ref="id55"/>
+			<target ref="id75"/>
 			<label kind="guard" x="-629" y="263">color == YELLOW</label>
 			<label kind="assignment" x="-619" y="314">finished_bags := finished_bags + 1</label>
 		</transition>
-		<transition id="id130">
-			<source ref="id98"/>
-			<target ref="id91"/>
+		<transition id="id94">
+			<source ref="id62"/>
+			<target ref="id55"/>
 			<label kind="guard" x="-527" y="348">dist_dir == left 
 &amp;&amp; x&gt;=1000</label>
 		</transition>
-		<transition id="id131">
-			<source ref="id97"/>
-			<target ref="id96"/>
+		<transition id="id95">
+			<source ref="id61"/>
+			<target ref="id60"/>
 			<label kind="guard" x="-136" y="314">dist_dir == right
 &amp;&amp; x&gt;=2200</label>
 			<label kind="assignment" x="-136" y="348">x:=0</label>
 			<nail x="-68" y="331"/>
 		</transition>
-		<transition id="id132">
-			<source ref="id97"/>
-			<target ref="id98"/>
+		<transition id="id96">
+			<source ref="id61"/>
+			<target ref="id62"/>
 			<label kind="guard" x="-348" y="399">dist_dir == left
 &amp;&amp; x&gt;=2200</label>
 			<label kind="assignment" x="-331" y="433">x:=0</label>
 			<nail x="-212" y="365"/>
 			<nail x="-272" y="399"/>
 		</transition>
-		<transition id="id133">
-			<source ref="id94"/>
-			<target ref="id95"/>
+		<transition id="id97">
+			<source ref="id58"/>
+			<target ref="id59"/>
 			<label kind="guard" x="306" y="408">dist_dir == left
 &amp;&amp; x&gt;=1000</label>
 			<label kind="assignment" x="323" y="442">x:=0</label>
 			<nail x="357" y="408"/>
 		</transition>
-		<transition id="id134">
-			<source ref="id95"/>
-			<target ref="id94"/>
+		<transition id="id98">
+			<source ref="id59"/>
+			<target ref="id58"/>
 			<label kind="guard" x="289" y="306">dist_dir == right
 &amp;&amp; x&gt;=2200</label>
 			<label kind="assignment" x="306" y="357">x:=0</label>
 			<nail x="356" y="340"/>
 		</transition>
-		<transition id="id135">
-			<source ref="id96"/>
-			<target ref="id97"/>
+		<transition id="id99">
+			<source ref="id60"/>
+			<target ref="id61"/>
 			<label kind="guard" x="-127" y="399">dist_dir == left
 &amp;&amp; x&gt;=2500</label>
 			<label kind="assignment" x="-102" y="433">x:=0</label>
 			<nail x="-68" y="399"/>
 		</transition>
-		<transition id="id136">
-			<source ref="id96"/>
-			<target ref="id95"/>
+		<transition id="id100">
+			<source ref="id60"/>
+			<target ref="id59"/>
 			<label kind="guard" x="110" y="323">dist_dir == right
 &amp;&amp; x&gt;=2500</label>
 			<label kind="assignment" x="119" y="357">x:=0</label>
 			<nail x="161" y="340"/>
 		</transition>
-		<transition id="id137">
-			<source ref="id94"/>
-			<target ref="id90"/>
+		<transition id="id101">
+			<source ref="id58"/>
+			<target ref="id54"/>
 			<label kind="guard" x="476" y="323">x &gt;= 1000 &amp;&amp;
 dist_dir == right</label>
 		</transition>
-		<transition id="id138">
-			<source ref="id93"/>
-			<target ref="id94"/>
+		<transition id="id102">
+			<source ref="id57"/>
+			<target ref="id58"/>
 			<label kind="guard" x="314" y="280">dist_dir == right</label>
 		</transition>
-		<transition id="id139">
-			<source ref="id103"/>
-			<target ref="id104"/>
+		<transition id="id103">
+			<source ref="id67"/>
+			<target ref="id68"/>
 			<label kind="guard" x="-144" y="-43">x == 200</label>
 			<label kind="assignment" x="-144" y="-26">x := 0,
 sRes(left)</label>
 		</transition>
-		<transition id="id140">
-			<source ref="id102"/>
-			<target ref="id103"/>
+		<transition id="id104">
+			<source ref="id66"/>
+			<target ref="id67"/>
 			<label kind="guard" x="-144" y="-136">x == 1200</label>
 			<label kind="assignment" x="-144" y="-119">x := 0,
 sInval(left)</label>
 		</transition>
-		<transition id="id141">
-			<source ref="id100"/>
-			<target ref="id102"/>
+		<transition id="id105">
+			<source ref="id64"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-144" y="-230">x == 200</label>
 			<label kind="assignment" x="-144" y="-212">x := 0,
 sVal(left)</label>
 		</transition>
-		<transition id="id142">
-			<source ref="id101"/>
-			<target ref="id92"/>
+		<transition id="id106">
+			<source ref="id65"/>
+			<target ref="id56"/>
 			<label kind="guard" x="-136" y="195">x &gt;= 2400</label>
 			<label kind="assignment" x="-136" y="212">x := 0</label>
 		</transition>
-		<transition id="id143">
-			<source ref="id99"/>
-			<target ref="id100"/>
+		<transition id="id107">
+			<source ref="id63"/>
+			<target ref="id64"/>
 			<label kind="synchronisation" x="-136" y="-315">bag[left]!</label>
 			<label kind="assignment" x="-136" y="-298">x := 0,
 sInval(left)</label>
 		</transition>
-		<transition id="id144">
-			<source ref="id89"/>
-			<target ref="id99"/>
+		<transition id="id108">
+			<source ref="id53"/>
+			<target ref="id63"/>
 			<label kind="synchronisation" x="-204" y="-374">place[left]?</label>
 			<label kind="assignment" x="-204" y="-408">color := color_order[id % 5],
 x := 0</label>
 		</transition>
-		<transition id="id145">
-			<source ref="id110"/>
-			<target ref="id113"/>
+		<transition id="id109">
+			<source ref="id74"/>
+			<target ref="id77"/>
 			<label kind="guard" x="238" y="51">x &gt;= 1000</label>
 			<label kind="assignment" x="246" y="85">x := 0</label>
 		</transition>
-		<transition id="id146">
-			<source ref="id109"/>
-			<target ref="id110"/>
+		<transition id="id110">
+			<source ref="id73"/>
+			<target ref="id74"/>
 			<label kind="guard" x="230" y="-35">x == 200</label>
 			<label kind="assignment" x="230" y="-18">x := 0,
 sRes(right)</label>
 		</transition>
-		<transition id="id147">
-			<source ref="id108"/>
-			<target ref="id109"/>
+		<transition id="id111">
+			<source ref="id72"/>
+			<target ref="id73"/>
 			<label kind="guard" x="230" y="-128">x == 1200</label>
 			<label kind="assignment" x="230" y="-111">x := 0,
 sInval(right)</label>
 		</transition>
-		<transition id="id148">
-			<source ref="id106"/>
-			<target ref="id108"/>
+		<transition id="id112">
+			<source ref="id70"/>
+			<target ref="id72"/>
 			<label kind="guard" x="230" y="-222">x == 200</label>
 			<label kind="assignment" x="230" y="-204">x := 0,
 sVal(right)</label>
 		</transition>
-		<transition id="id149">
-			<source ref="id105"/>
-			<target ref="id106"/>
+		<transition id="id113">
+			<source ref="id69"/>
+			<target ref="id70"/>
 			<label kind="synchronisation" x="238" y="-315">bag[right]!</label>
 			<label kind="assignment" x="238" y="-298">x := 0,
 sInval(right)</label>
 		</transition>
-		<transition id="id150">
-			<source ref="id89"/>
-			<target ref="id105"/>
+		<transition id="id114">
+			<source ref="id53"/>
+			<target ref="id69"/>
 			<label kind="synchronisation" x="110" y="-374">place[right]?</label>
 			<label kind="assignment" x="110" y="-408">color := color_order[id % 5],
 x := 0</label>
 		</transition>
-		<transition id="id151">
-			<source ref="id115"/>
-			<target ref="id116"/>
+		<transition id="id115">
+			<source ref="id79"/>
+			<target ref="id80"/>
 			<label kind="synchronisation" x="-365" y="153">move_bag[left]?</label>
 			<label kind="assignment" x="-280" y="136">x := 0</label>
 			<nail x="-306" y="153"/>
 		</transition>
-		<transition id="id152">
-			<source ref="id116"/>
-			<target ref="id115"/>
+		<transition id="id116">
+			<source ref="id80"/>
+			<target ref="id79"/>
 			<label kind="guard" x="-331" y="85">feed_m[left] == stop</label>
 			<label kind="synchronisation" x="-331" y="68">stop_bag[left]?</label>
-		</transition>
-	</template>
-	<template>
-		<name>Template</name>
-		<declaration>// Place local declarations here.
-clock x;
-
-int storage = 0;
-
-color_t color;
-direc_t side;
-
-void sInval(direc_t side) {
-    if (sensor_on[side]) {
-    double uniform = 0.5; //random(1);
-    if (color == YELLOW) {
-        uniform = uniform * 10 + 60;
-    } else {
-        uniform = uniform * 25 + 45;
-    }
-    sensor_val[side] = fint(uniform);
-    }
-}
-
-void sVal(direc_t side) {
-    if (sensor_on[side]) {
-        double uniform = 0.5; //random(1);
-        if (color == YELLOW) {
-            uniform = uniform * 10 + 50;
-        } else {
-            uniform = uniform * 15 + 30;
-        }
-        sensor_val[side] = fint(uniform);
-    }
-}
-
-void sRes(direc_t side) {
-    if (sensor_on[side]) {
-        double uniform = 0.5; //random(1);
-        sensor_val[side] = fint(uniform * 30 + 70);
-    }
-}
-
-</declaration>
-		<location id="id153" x="-153" y="9">
-			<label kind="invariant" x="-229" y="-8">x &lt;= 24</label>
-		</location>
-		<location id="id154" x="-153" y="102">
-			<name x="-280" y="76">turning_begin1</name>
-			<label kind="invariant" x="-229" y="102">x &lt;= 27</label>
-		</location>
-		<location id="id155" x="34" y="-340">
-			<name x="8" y="-383">Start</name>
-		</location>
-		<location id="id156" x="544" y="280">
-			<name x="534" y="246">B</name>
-			<urgent/>
-		</location>
-		<location id="id157" x="-510" y="314">
-			<name x="-520" y="280">A</name>
-			<urgent/>
-		</location>
-		<location id="id158" x="51" y="204">
-			<name x="17" y="170">turning_end1</name>
-			<committed/>
-		</location>
-		<location id="id159" x="425" y="365">
-			<name x="415" y="331">e2</name>
-			<label kind="invariant" x="415" y="382">x&lt;=12</label>
-		</location>
-		<location id="id160" x="272" y="365">
-			<name x="262" y="331">d2</name>
-			<label kind="invariant" x="262" y="382">x&lt;=23</label>
-		</location>
-		<location id="id161" x="59" y="374">
-			<name x="49" y="340">f</name>
-			<label kind="invariant" x="49" y="391">x&lt;=31</label>
-		</location>
-		<location id="id162" x="-195" y="357">
-			<name x="-205" y="323">d1</name>
-			<label kind="invariant" x="-205" y="374">x&lt;=23</label>
-		</location>
-		<location id="id163" x="-374" y="357">
-			<name x="-384" y="323">e1</name>
-			<label kind="invariant" x="-384" y="374">x&lt;=12</label>
-		</location>
-		<location id="id164" x="-170" y="-212">
-			<name x="-178" y="-246">placed</name>
-			<committed/>
-		</location>
-		<location id="id165" x="-170" y="-118">
-			<name x="-314" y="-144">sensor_entering</name>
-			<label kind="invariant" x="-263" y="-127">x &lt;= 2</label>
-		</location>
-		<location id="id166" x="119" y="-118">
-			<name x="136" y="-135">sensor_front</name>
-			<label kind="invariant" x="153" y="-118">x &lt;= 12</label>
-		</location>
-		<location id="id167" x="119" y="9">
-			<name x="136" y="-8">sensor_exiting</name>
-			<label kind="invariant" x="145" y="8">x &lt;= 2</label>
-		</location>
-		<location id="id168" x="-161" y="255">
-			<committed/>
-		</location>
-		<location id="id169" x="246" y="255">
-			<committed/>
-		</location>
-		<init ref="id155"/>
-		<transition id="id170">
-			<source ref="id169"/>
-			<target ref="id161"/>
-			<label kind="guard" x="119" y="272">dist_dir == left</label>
-		</transition>
-		<transition id="id171">
-			<source ref="id169"/>
-			<target ref="id159"/>
-			<label kind="guard" x="280" y="280">dist_dir == right</label>
-		</transition>
-		<transition id="id172">
-			<source ref="id168"/>
-			<target ref="id161"/>
-			<label kind="guard" x="-102" y="272">dist_dir == right</label>
-		</transition>
-		<transition id="id173">
-			<source ref="id168"/>
-			<target ref="id163"/>
-			<label kind="guard" x="-340" y="263">dist_dir == left</label>
-		</transition>
-		<transition id="id174">
-			<source ref="id158"/>
-			<target ref="id169"/>
-			<label kind="guard" x="102" y="204">side == right</label>
-		</transition>
-		<transition id="id175">
-			<source ref="id158"/>
-			<target ref="id168"/>
-			<label kind="guard" x="-102" y="204">side == left</label>
-		</transition>
-		<transition id="id176">
-			<source ref="id153"/>
-			<target ref="id154"/>
-			<label kind="guard" x="-144" y="34">x == 24</label>
-			<label kind="assignment" x="-144" y="51">x := 0</label>
-		</transition>
-		<transition id="id177">
-			<source ref="id163"/>
-			<target ref="id162"/>
-			<label kind="guard" x="-340" y="314">dist_dir == right
-&amp;&amp; x&gt;=10</label>
-			<label kind="assignment" x="-323" y="348">x:=0</label>
-			<nail x="-280" y="331"/>
-		</transition>
-		<transition id="id178">
-			<source ref="id160"/>
-			<target ref="id161"/>
-			<label kind="guard" x="119" y="399">dist_dir==left
-&amp;&amp; x&gt;=22</label>
-			<label kind="assignment" x="136" y="433">x:=0</label>
-			<nail x="170" y="399"/>
-		</transition>
-		<transition id="id179">
-			<source ref="id156"/>
-			<target ref="id155"/>
-			<nail x="518" y="-110"/>
-			<nail x="408" y="-289"/>
-		</transition>
-		<transition id="id180">
-			<source ref="id157"/>
-			<target ref="id155"/>
-			<nail x="-433" y="-85"/>
-			<nail x="-280" y="-289"/>
-		</transition>
-		<transition id="id181">
-			<source ref="id163"/>
-			<target ref="id157"/>
-			<label kind="guard" x="-527" y="348">dist_dir == left 
-&amp;&amp; x&gt;=10</label>
-		</transition>
-		<transition id="id182">
-			<source ref="id162"/>
-			<target ref="id161"/>
-			<label kind="guard" x="-136" y="314">dist_dir == right
-&amp;&amp; x&gt;=22</label>
-			<label kind="assignment" x="-136" y="348">x:=0</label>
-			<nail x="-68" y="331"/>
-		</transition>
-		<transition id="id183">
-			<source ref="id162"/>
-			<target ref="id163"/>
-			<label kind="guard" x="-348" y="399">dist_dir == left
-&amp;&amp; x&gt;=22</label>
-			<label kind="assignment" x="-331" y="433">x:=0</label>
-			<nail x="-212" y="365"/>
-			<nail x="-272" y="399"/>
-		</transition>
-		<transition id="id184">
-			<source ref="id159"/>
-			<target ref="id160"/>
-			<label kind="guard" x="306" y="408">dist_dir == left
-&amp;&amp; x&gt;=10</label>
-			<label kind="assignment" x="323" y="442">x:=0</label>
-			<nail x="357" y="408"/>
-		</transition>
-		<transition id="id185">
-			<source ref="id160"/>
-			<target ref="id159"/>
-			<label kind="guard" x="289" y="323">dist_dir == right
-&amp;&amp; x&gt;=22</label>
-			<label kind="assignment" x="306" y="357">x:=0</label>
-			<nail x="356" y="340"/>
-		</transition>
-		<transition id="id186">
-			<source ref="id161"/>
-			<target ref="id162"/>
-			<label kind="guard" x="-127" y="399">dist_dir == left
-&amp;&amp; x&gt;=25</label>
-			<label kind="assignment" x="-102" y="433">x:=0</label>
-			<nail x="-68" y="399"/>
-		</transition>
-		<transition id="id187">
-			<source ref="id161"/>
-			<target ref="id160"/>
-			<label kind="guard" x="110" y="323">dist_dir == right
-&amp;&amp; x&gt;=25</label>
-			<label kind="assignment" x="119" y="357">x:=0</label>
-			<nail x="161" y="340"/>
-		</transition>
-		<transition id="id188">
-			<source ref="id159"/>
-			<target ref="id156"/>
-			<label kind="guard" x="476" y="323">x &gt;= 10 &amp;&amp;
-dist_dir == right</label>
-		</transition>
-		<transition id="id189">
-			<source ref="id167"/>
-			<target ref="id153"/>
-			<label kind="guard" x="-76" y="9">x == 2</label>
-			<label kind="assignment" x="-8" y="9">x := 0,
-sRes(side)</label>
-		</transition>
-		<transition id="id190">
-			<source ref="id166"/>
-			<target ref="id167"/>
-			<label kind="guard" x="136" y="-93">x == 12</label>
-			<label kind="assignment" x="136" y="-76">x := 0,
-sInval(side)</label>
-		</transition>
-		<transition id="id191">
-			<source ref="id165"/>
-			<target ref="id166"/>
-			<label kind="guard" x="-127" y="-119">x == 2</label>
-			<label kind="assignment" x="-68" y="-135">x := 0,
-sVal(side)</label>
-		</transition>
-		<transition id="id192">
-			<source ref="id154"/>
-			<target ref="id158"/>
-			<label kind="guard" x="-85" y="110">x &gt;= 24</label>
-			<label kind="assignment" x="-77" y="127">x := 0</label>
-		</transition>
-		<transition id="id193">
-			<source ref="id164"/>
-			<target ref="id165"/>
-			<label kind="synchronisation" x="-161" y="-203">bag[side]!</label>
-			<label kind="assignment" x="-161" y="-186">x := 0,
-sInval(side)</label>
-		</transition>
-		<transition id="id194">
-			<source ref="id155"/>
-			<target ref="id164"/>
-			<label kind="select" x="42" y="-306">random_color : color_t,
-random_side : direc_t</label>
-			<label kind="assignment" x="42" y="-272">color := random_color,
-side := random_side</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -1183,11 +712,12 @@ feed_belt0 =  Feed(left);
 feed_belt1 =  Feed(right);
 
 dropper = SmortBagDropperEx3(NUM_OF_BAGS, right);
-//dropper = SmortBagDropperEx4(NUM_OF_BAGS);
+sortleft = SingleSortEx5(left);
+sortright = SingleSortEx5(right);
 
 system Bag, Distribution, feed_belt0, feed_belt1, 
 dropper,
-SingleSortEx5;
+sortleft, sortright;
 </system>
 	<queries>
 		<option key="--diagnostic" value="1"/>
@@ -1336,7 +866,7 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 		<query>
 			<formula>E&lt;&gt; exists (i: bag_id_t) Bag(i).A &amp;&amp; Bag(i).color == BLACK</formula>
 			<comment>Black is sometimes sorted incorrectly (we expect this to be true when using exercise 5)</comment>
-			<result outcome="failure" type="quality" timestamp="2024-03-20 15:10:38 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-22 14:24:52 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
@@ -1344,7 +874,7 @@ Bag(i).turning_end1 || Bag(i).turning_end2)
 			<formula>E&lt;&gt; exists (i: bag_id_t) Bag(i).B &amp;&amp; Bag(i).color == YELLOW</formula>
 			<comment>Yellow is sometimes sorted incorrectly (we expect this to be false even in exercise 5)</comment>
 			<option key="--diagnostic" value="1"/>
-			<result outcome="failure" type="quality" timestamp="2024-03-20 15:08:35 +0100">
+			<result outcome="failure" type="quality" timestamp="2024-03-22 14:24:55 +0100">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
