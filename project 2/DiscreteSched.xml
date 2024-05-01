@@ -28,7 +28,7 @@
 </location>
 <location id="id4" x="-256" y="96">
 <name x="-328" y="96">Done</name>
-<label kind="invariant" x="-240" y="104">x <= T[id]</label>
+<label kind="invariant" x="-240" y="104">x &lt;= T[id]</label>
 </location>
 <location id="id5" x="-416" y="-160"> </location>
 <location id="id6" x="-256" y="-160">
@@ -80,7 +80,7 @@
 <declaration>/* Fixed priority scheduler for a uni-processor. The scheduler monitors the signal need[id] of all processes. At any time the process with the highest prioirity (lowest process id) among those with need[id] != 0 is selected for execution indicated by having run[id] set to true. Once a process has indicated its need of processor time by setting need[id] != 0, it is considered to have engaged in a long-lasting activity and any state changes should be done only when the process is scheduled, ie. being guarded by run[id]. A process, id, indicates its desire to use processing time in the need[id] variable. For the scheduled process, this variable is decremented in discrete amounts (of 1 time unit). When the needed time reaches 0, the process is supposed to have ended and will not be scheduled again. When this occurs, the process should immediate move on to its next activity. To model that a process may not actually use all the indicated cpu-time, it can set need[id] = 0 at any time when scheduled (ie. run[id] is true). To model actions which take negligible time, but anyhow may be preempted before carried out, the need[id] variable may be set to the special value DELTA. This acts much like zero needed time, but allows for preemption. When the scheduler selects the process for execution, run[id] will be set and time cannot advance. The process must ITSELF set need[id] = 0 when done. As sanity check, the model should always be verified to be deadlock free */ // The need and run signals are declared globally clock x; ExtPID current; const int IDLE = N; void initialize() { current = IDLE; need[IDLE] = INF; run[current] = true; } int maxprio() { for(pid:ExtPID) { if(need[pid] != 0) return pid; } return -1; //should not happen. } void decrement(ExtPID pid) { if(need[pid] > 0) --need[pid]; //else need == DELTA or need == INF } </declaration>
 <location id="id7" x="96" y="-128" color="#ffa500">
 <name x="120" y="-144">Run_delta</name>
-<label kind="invariant" x="112" y="-120">x < 1</label>
+<label kind="invariant" x="112" y="-120">x &lt; 1</label>
 <urgent/>
 </location>
 <location id="id8" x="-160" y="-224">
@@ -92,13 +92,13 @@
 </location>
 <location id="id10" x="-160" y="32">
 <name x="-192" y="72">Reschedule</name>
-<label kind="invariant" x="-176" y="48">x < 1</label>
+<label kind="invariant" x="-176" y="48">x &lt; 1</label>
 <label kind="comments" x="-170" y="67">Invariant ensures that all processes which are done are handled before a reschedule is attempted.</label>
 <committed/>
 </location>
 <location id="id11" x="-160" y="-128">
 <name x="-152" y="-168">Run</name>
-<label kind="invariant" x="-176" y="-104">x<=1</label>
+<label kind="invariant" x="-176" y="-104">x&lt;=1</label>
 </location>
 <init ref="id8"/>
 <transition>
