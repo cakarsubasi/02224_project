@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int NUM_OF_BELTS = 1; 
+typedef int[0, NUM_OF_BELTS-1] belt_id_t;
+// Due to our time constraint, there can only be two bags at a single belt at a time
+
+chan Interrupt[NUM_OF_BELTS];
+chan Resume[NUM_OF_BELTS];
+
+chan start_record;
+chan stop_record;
+
+urgent chan SensorOn[NUM_OF_BELTS];
+urgent chan SensorOff[NUM_OF_BELTS];
+
+bool sensor_detected[NUM_OF_BELTS];
+
+const int ARRIVAL_DIST = 23;
+int R = 0;
+clock global = ARRIVAL_DIST;</declaration>
+	<template>
+		<name>Control</name>
+		<parameter>int[0, NUM_OF_BELTS-1] current_belt</parameter>
+		<declaration>clock x;
+
+int current_state;
+
+int memory[NUM_OF_BELTS];</declaration>
+		<location id="id0" x="-119" y="-263">
+			<name x="-195" y="-272">AwaitS</name>
+			<label kind="comments" x="-323" y="-212">Use a channel here?</label>
+		</location>
+		<location id="id1" x="-119" y="-136">
+			<name x="-212" y="-145">AwaitNotS</name>
+		</location>
+		<location id="id2" x="-119" y="-8">
+			<name x="-187" y="-17">Sleep7</name>
+			<label kind="invariant" x="-93" y="-17">x&lt;=7</label>
+		</location>
+		<location id="id3" x="-119" y="110">
+			<name x="-187" y="102">Sleep6</name>
+			<label kind="invariant" x="-93" y="102">x&lt;=6</label>
+		</location>
+		<location id="id4" x="-119" y="221">
+			<name x="-238" y="212">ProcessVideo</name>
+			<label kind="invariant" x="-102" y="221">x&lt;=6</label>
+		</location>
+		<location id="id5" x="-119" y="348">
+			<name x="-195" y="340">SendId</name>
+			<urgent/>
+		</location>
+		<location id="id6" x="-119" y="-365">
+			<name x="-129" y="-399">Start</name>
+			<urgent/>
+		</location>
+		<init ref="id6"/>
+		<transition id="id7">
+			<source ref="id6"/>
+			<target ref="id0"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id5"/>
+			<target ref="id0"/>
+			<nail x="0" y="348"/>
+			<nail x="8" y="-263"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-110" y="263">x&gt;=0</label>
+			<label kind="assignment" x="-110" y="289">x=0</label>
+		</transition>
+		<transition id="id10">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-110" y="144">x&gt;=6</label>
+			<label kind="synchronisation" x="-110" y="178">stop_record!</label>
+			<label kind="assignment" x="-110" y="161">x=0, R=0</label>
+		</transition>
+		<transition id="id11">
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-102" y="17">x&gt;=7</label>
+			<label kind="synchronisation" x="-119" y="51">start_record!</label>
+			<label kind="assignment" x="-110" y="34">x=0, R=1</label>
+		</transition>
+		<transition id="id12">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-102" y="-110">!sensor_detected[current_belt]</label>
+			<label kind="synchronisation" x="-102" y="-68">SensorOff[current_belt]?</label>
+			<label kind="assignment" x="-102" y="-85">x=0</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-102" y="-212">sensor_detected[current_belt]</label>
+			<label kind="synchronisation" x="-102" y="-187">SensorOn[current_belt]?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Sensor</name>
+		<parameter>belt_id_t belt_id</parameter>
+		<location id="id14" x="-170" y="17">
+		</location>
+		<location id="id15" x="-17" y="17">
+		</location>
+		<init ref="id14"/>
+		<transition id="id16">
+			<source ref="id15"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-170" y="68">!sensor_detected[belt_id]</label>
+			<label kind="synchronisation" x="-144" y="119">SensorOff[belt_id]!</label>
+			<nail x="0" y="110"/>
+			<nail x="-153" y="110"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id14"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-187" y="-59">sensor_detected[belt_id]</label>
+			<label kind="synchronisation" x="-178" y="-102">SensorOn[belt_id]!</label>
+			<nail x="-187" y="-77"/>
+			<nail x="-34" y="-77"/>
+		</transition>
+	</template>
+	<template>
+		<name>Item</name>
+		<parameter>belt_id_t belt_id</parameter>
+		<declaration>clock x;
+clock y;
+bool recorded = false;
+</declaration>
+		<location id="id18" x="-306" y="-323">
+			<name x="-289" y="-332">Laser</name>
+			<label kind="invariant" x="-365" y="-332">x&lt;=6</label>
+		</location>
+		<location id="id19" x="-306" y="-195">
+			<name x="-289" y="-204">BeforeVideo</name>
+			<label kind="invariant" x="-357" y="-204">x&lt;=5</label>
+		</location>
+		<location id="id20" x="-306" y="-76">
+			<name x="-289" y="-85">InFrame</name>
+			<label kind="invariant" x="-297" y="-68">x &lt;= 16</label>
+		</location>
+		<location id="id21" x="-306" y="42">
+			<name x="-331" y="59">End</name>
+			<urgent/>
+		</location>
+		<location id="id22" x="-306" y="-433">
+			<name x="-289" y="-467">Start</name>
+		</location>
+		<location id="id23" x="-518" y="-76">
+			<name x="-543" y="-110">Record</name>
+		</location>
+		<init ref="id22"/>
+		<transition id="id24">
+			<source ref="id23"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-433" y="-34">y &lt; 4</label>
+			<label kind="synchronisation" x="-459" y="-8">stop_record?</label>
+			<nail x="-467" y="-8"/>
+			<nail x="-357" y="-8"/>
+		</transition>
+		<transition id="id25">
+			<source ref="id23"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-433" y="-161">y &gt;= 4</label>
+			<label kind="synchronisation" x="-459" y="-127">stop_record?</label>
+			<label kind="assignment" x="-476" y="-144">recorded = true</label>
+			<nail x="-476" y="-144"/>
+			<nail x="-348" y="-144"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id20"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-476" y="-76">start_record?</label>
+			<label kind="assignment" x="-408" y="-93">y = 0</label>
+			<nail x="-399" y="-76"/>
+		</transition>
+		<transition id="id27">
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-297" y="-34">x&gt;=16</label>
+			<label kind="assignment" x="-297" y="-8">x=0</label>
+		</transition>
+		<transition id="id28">
+			<source ref="id22"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-535" y="-416">global &gt;= ARRIVAL_DIST</label>
+			<label kind="assignment" x="-578" y="-391">sensor_detected[belt_id]=true,
+x=0, global = 0, recorded =false</label>
+		</transition>
+		<transition id="id29">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-297" y="-144">x&gt;=5</label>
+			<label kind="assignment" x="-297" y="-119">x=0</label>
+		</transition>
+		<transition id="id30">
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-297" y="-255">x&gt;=2</label>
+			<label kind="assignment" x="-561" y="-272">x=0,
+sensor_detected[belt_id]=false</label>
+		</transition>
+		<transition id="id31">
+			<source ref="id21"/>
+			<target ref="id22"/>
+			<label kind="assignment" x="-288" y="42">x=0</label>
+			<nail x="-110" y="42"/>
+			<nail x="-110" y="-433"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+// List one or more processes to be composed into a system.
+it1 = Item(0);
+it2 = Item(0);
+it3 = Item(0);
+system 
+Control,
+Sensor,
+it1,it2,it3;
+</system>
+	<queries>
+		<option key="--diagnostic" value="1"/>
+		<query>
+			<formula>A[] !deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-01 15:50:24 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] it1.End imply it1.recorded == true</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-01 16:43:34 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; it1.End</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-01 15:36:46 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>
