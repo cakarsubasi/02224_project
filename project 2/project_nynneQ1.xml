@@ -3,35 +3,30 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-const int NUM_OF_BELTS = 1; 
-typedef int[0, NUM_OF_BELTS-1] belt_id_t;
+const int NUM_OF_ITEMS = 2; 
+typedef int[0, NUM_OF_ITEMS] item_id_t;
 // Due to our time constraint, there can only be two bags at a single belt at a time
 
-chan Interrupt[NUM_OF_BELTS];
-chan Resume[NUM_OF_BELTS];
 
 chan start_record;
 chan stop_record;
 
-urgent chan SensorOn[NUM_OF_BELTS];
-urgent chan SensorOff[NUM_OF_BELTS];
+urgent chan SensorOn;
+urgent chan SensorOff;
 
-bool sensor_detected[NUM_OF_BELTS];
+bool sensor_detected;
 
-const int ARRIVAL_DIST = 23;
+const int ARRIVAL_DIST = 26;
 int R = 0;
 clock global = ARRIVAL_DIST;</declaration>
 	<template>
 		<name>Control</name>
-		<parameter>int[0, NUM_OF_BELTS-1] current_belt</parameter>
 		<declaration>clock x;
 
 int current_state;
-
-int memory[NUM_OF_BELTS];</declaration>
+</declaration>
 		<location id="id0" x="-119" y="-263">
 			<name x="-195" y="-272">AwaitS</name>
-			<label kind="comments" x="-323" y="-212">Use a channel here?</label>
 		</location>
 		<location id="id1" x="-119" y="-136">
 			<name x="-212" y="-145">AwaitNotS</name>
@@ -64,8 +59,8 @@ int memory[NUM_OF_BELTS];</declaration>
 		<transition id="id8">
 			<source ref="id5"/>
 			<target ref="id0"/>
-			<nail x="0" y="348"/>
-			<nail x="8" y="-263"/>
+			<nail x="25" y="348"/>
+			<nail x="25" y="-263"/>
 		</transition>
 		<transition id="id9">
 			<source ref="id4"/>
@@ -83,27 +78,26 @@ int memory[NUM_OF_BELTS];</declaration>
 		<transition id="id11">
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="guard" x="-102" y="17">x&gt;=7</label>
-			<label kind="synchronisation" x="-119" y="51">start_record!</label>
+			<label kind="guard" x="-110" y="17">x&gt;=7</label>
+			<label kind="synchronisation" x="-110" y="51">start_record!</label>
 			<label kind="assignment" x="-110" y="34">x=0, R=1</label>
 		</transition>
 		<transition id="id12">
 			<source ref="id1"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-102" y="-110">!sensor_detected[current_belt]</label>
-			<label kind="synchronisation" x="-102" y="-68">SensorOff[current_belt]?</label>
-			<label kind="assignment" x="-102" y="-85">x=0</label>
+			<label kind="guard" x="-110" y="-110">!sensor_detected</label>
+			<label kind="synchronisation" x="-110" y="-76">SensorOff?</label>
+			<label kind="assignment" x="-110" y="-93">x=0</label>
 		</transition>
 		<transition id="id13">
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="guard" x="-102" y="-212">sensor_detected[current_belt]</label>
-			<label kind="synchronisation" x="-102" y="-187">SensorOn[current_belt]?</label>
+			<label kind="guard" x="-110" y="-229">sensor_detected</label>
+			<label kind="synchronisation" x="-110" y="-204">SensorOn?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Sensor</name>
-		<parameter>belt_id_t belt_id</parameter>
 		<location id="id14" x="-170" y="17">
 		</location>
 		<location id="id15" x="-17" y="17">
@@ -112,23 +106,23 @@ int memory[NUM_OF_BELTS];</declaration>
 		<transition id="id16">
 			<source ref="id15"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-170" y="68">!sensor_detected[belt_id]</label>
-			<label kind="synchronisation" x="-144" y="119">SensorOff[belt_id]!</label>
+			<label kind="guard" x="-144" y="85">!sensor_detected</label>
+			<label kind="synchronisation" x="-127" y="110">SensorOff!</label>
 			<nail x="0" y="110"/>
 			<nail x="-153" y="110"/>
 		</transition>
 		<transition id="id17">
 			<source ref="id14"/>
 			<target ref="id15"/>
-			<label kind="guard" x="-187" y="-59">sensor_detected[belt_id]</label>
-			<label kind="synchronisation" x="-178" y="-102">SensorOn[belt_id]!</label>
+			<label kind="guard" x="-178" y="-102">sensor_detected</label>
+			<label kind="synchronisation" x="-153" y="-76">SensorOn!</label>
 			<nail x="-187" y="-77"/>
 			<nail x="-34" y="-77"/>
 		</transition>
 	</template>
 	<template>
 		<name>Item</name>
-		<parameter>belt_id_t belt_id</parameter>
+		<parameter>item_id_t id</parameter>
 		<declaration>clock x;
 clock y;
 bool recorded = false;
@@ -189,9 +183,9 @@ bool recorded = false;
 		<transition id="id28">
 			<source ref="id22"/>
 			<target ref="id18"/>
-			<label kind="guard" x="-535" y="-416">global &gt;= ARRIVAL_DIST</label>
-			<label kind="assignment" x="-578" y="-391">sensor_detected[belt_id]=true,
-x=0, global = 0, recorded =false</label>
+			<label kind="guard" x="-510" y="-416">global &gt;= ARRIVAL_DIST</label>
+			<label kind="assignment" x="-527" y="-399">sensor_detected=true,x=0, 
+global=0, recorded=false</label>
 		</transition>
 		<transition id="id29">
 			<source ref="id19"/>
@@ -203,8 +197,8 @@ x=0, global = 0, recorded =false</label>
 			<source ref="id18"/>
 			<target ref="id19"/>
 			<label kind="guard" x="-297" y="-255">x&gt;=2</label>
-			<label kind="assignment" x="-561" y="-272">x=0,
-sensor_detected[belt_id]=false</label>
+			<label kind="assignment" x="-484" y="-272">x=0,
+sensor_detected=false</label>
 		</transition>
 		<transition id="id31">
 			<source ref="id21"/>
@@ -216,13 +210,10 @@ sensor_detected[belt_id]=false</label>
 	</template>
 	<system>// Place template instantiations here.
 // List one or more processes to be composed into a system.
-it1 = Item(0);
-it2 = Item(0);
-it3 = Item(0);
+
 system 
 Control,
-Sensor,
-it1,it2,it3;
+Sensor,Item;
 </system>
 	<queries>
 		<option key="--diagnostic" value="1"/>
@@ -234,22 +225,18 @@ it1,it2,it3;
 			</result>
 		</query>
 		<query>
-			<formula>A[] it1.End imply it1.recorded == true</formula>
+			<formula>A[] forall(i : item_id_t) Item(i).End imply Item(i).recorded == true</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-05-01 16:43:34 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-06 14:55:54 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
 		</query>
 		<query>
-			<formula>E&lt;&gt; it1.End</formula>
+			<formula>E&lt;&gt; exists(i : item_id_t) Item(i).End</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-05-01 15:36:46 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-06 14:51:56 +0200">
 				<option key="--diagnostic" value="1"/>
 			</result>
-		</query>
-		<query>
-			<formula/>
-			<comment/>
 		</query>
 	</queries>
 </nta>
