@@ -31,8 +31,8 @@ typedef struct {
 const task_t task[Tasks] = {
 {0,3,3,0,3,1,1,0,4},
 {0,4,4,0,4,2,2,0,3},
-{0,5,5,0,5,3,3,0,2},
-{0,7,7,0,7,3,3,0,1}
+{0,5,5,0,5,6,6,1,1},
+{0,7,7,0,7,3,3,0,2}
 };
 
 typedef struct {
@@ -436,7 +436,7 @@ place = (preempt ? 0 : 1)</label>
 //Task id, res. ass., bcet, wcet, deadline, offset, period
 
 P0  = Resource(0,false,EDF);
-P1  = Resource(0,false,EDF);
+P1  = Resource(1,false,EDF);
 //Bus = Resource(2,false,FIFO);
 
 system Task, P0, P1, Policy_FPS, Policy_FIFO;</system>
@@ -445,13 +445,13 @@ system Task, P0, P1, Policy_FPS, Policy_FIFO;</system>
 			<formula>A[] forall (i : t_id) not Task(i).Error
 			</formula>
 			<comment/>
-			<result outcome="maybe_false" type="quality" timestamp="2024-05-19 12:35:11 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-19 12:47:14 +0200">
 			</result>
 		</query>
 		<query>
 			<formula>E&lt;&gt; exists(i: t_id) Task(i).Error</formula>
 			<comment/>
-			<result outcome="failure" type="quality" timestamp="2024-05-19 12:33:29 +0200">
+			<result outcome="failure" type="quality" timestamp="2024-05-19 12:45:20 +0200">
 			</result>
 		</query>
 	</queries>

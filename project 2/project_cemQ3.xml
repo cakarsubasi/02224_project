@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int NUM_OF_BELTS = 2; 
+const int ITEM_PER_BELT = 1;
+typedef int[0, NUM_OF_BELTS-1] belt_id_t;
+typedef int[0, ITEM_PER_BELT-1] item_id_t;
+// Due to our time constraint, there can only be two bags at a single belt at a time
+
+chan Preempt[NUM_OF_BELTS];
+urgent chan Resume[NUM_OF_BELTS];
+chan Ready;
+
+// These have to be broadcast channels to prevent control from deadlocking
+broadcast chan start_record[NUM_OF_BELTS];
+broadcast chan stop_record[NUM_OF_BELTS];
+
+urgent chan SensorOn[NUM_OF_BELTS];
+urgent chan SensorOff[NUM_OF_BELTS];
+
+bool sensor_detected[NUM_OF_BELTS];
+
+typedef int[0, NUM_OF_BELTS-1] pid_t;
+const int P[pid_t] = { 2, 1  };		// Priorities
+
+// Task queue
+pid_t queue[pid_t];
+int N = NUM_OF_BELTS;
+int[0, NUM_OF_BELTS] len = 0;
+
+// -1 indicates no process is currently running
+int running_ = -1;
+
+
+void bubble_sort() {
+  bool picked[pid_t];
+  for(i : pid_t)
+  {
+    int max = -1, t = -1;
+    for(j : pid_t)
+    {
+      if (!picked[j] &amp;&amp; P[j] &gt; max)
+      {
+        max = P[j];
+        t = j;
+      }
+    }
+    picked[t] = true;
+    queue[i] = t;
+  }
+}
+
+void initialize()
+{
+    bubble_sort();
+}
+
+pid_t head()   { return queue[0]; }
+bool isEmpty() { return len == 0; }
+
+void add(pid_t id)
+{
+  pid_t i, tmp;
+  queue[len] = id;
+  for(i = len ; i &gt; 0 &amp;&amp; P[queue[i]] &gt; P[queue[i-1]]; --i)
+  {
+    tmp = queue[i];
+    queue[i] = queue[i-1];
+    queue[i-1] = tmp;
+  }
+  len++;
+}
+
+void remove()
+{
+  int i;
+  for(i = 0; i+1 &lt; N; ++i) { queue[i] = queue[i+1]; }
+  queue[--len] = 0;
+}
+
+// Return the pid of the top priority process in the queue
+pid_t top_priority() {
+    return head();
+}
+
+// Return the pid of the currently running process
+int running() {
+    return running_;
+}
+
+// Return true if no process is running
+bool not_running() {
+    return running() == -1;
+}
+
+// If it is possible to preempt the currently running task with a task in the queue, return true
+bool preemptable() {
+    if (len == 0 || running() == -1) {
+        return false;
+    }
+    return (P[head()] &gt; P[running()]);
+}   
+</declaration>
+	<template>
+		<name>Control</name>
+		<parameter>pid_t id</parameter>
+		<declaration>clock x;
+
+int current_state = 0;
+
+int memory[NUM_OF_BELTS];
+
+const int sleep1 = 7;
+const int sleep2 = 6;
+int[0,6] process_rmd = 6;
+const int sleep3[6] = {1, 2, 3, 4, 5, 6};
+
+void initControl(pid_t id) {
+    current_state = 0;
+    add(id);
+}
+
+void ready() {
+    add(id);
+}
+
+void suspend(int x) {
+    running_ = -1;
+    current_state = x;
+}
+
+void preempt(int s) {
+    running_ = -1;
+    current_state = s;
+    add(id);
+    if (s == 4 &amp;&amp; process_rmd != 0) {
+        int cl = 1;
+        process_rmd = process_rmd - cl;
+    }
+}
+
+bool resume(int x) {
+    return x == current_state;
+}
+
+// Impure function
+void resume2(int x) {
+    assert(head() == id);
+    running_ = id;
+    remove();
+    
+}</declaration>
+		<location id="id0" x="-119" y="-263">
+			<name x="-195" y="-289">AwaitS</name>
+		</location>
+		<location id="id1" x="-119" y="-153">
+			<name x="-221" y="-178">AwaitNotS</name>
+		</location>
+		<location id="id2" x="-119" y="-8">
+			<name x="-170" y="-25">SetR</name>
+			<urgent/>
+		</location>
+		<location id="id3" x="-119" y="119">
+			<name x="-178" y="94">UnSetR</name>
+			<urgent/>
+		</location>
+		<location id="id4" x="-119" y="229">
+			<name x="-238" y="229">ProcessVideo</name>
+			<label kind="invariant" x="-110" y="237">x&lt;=process_rmd</label>
+		</location>
+		<location id="id5" x="-119" y="323">
+			<name x="-195" y="315">SendId</name>
+			<urgent/>
+		</location>
+		<location id="id6" x="-612" y="-263">
+			<name x="-688" y="-289">Wait</name>
+		</location>
+		<location id="id7" x="-297" y="119">
+			<name x="-365" y="119">Sleep2</name>
+			<label kind="invariant" x="-382" y="85">x&lt;=sleep2</label>
+		</location>
+		<location id="id8" x="-297" y="-8">
+			<name x="-365" y="-8">Sleep1</name>
+			<label kind="invariant" x="-382" y="-34">x&lt;=sleep1</label>
+		</location>
+		<location id="id9" x="-612" y="-408">
+			<name x="-622" y="-442">Init</name>
+			<urgent/>
+		</location>
+		<location id="id10" x="-773" y="-306">
+			<name x="-807" y="-348">Suspended</name>
+			<urgent/>
+		</location>
+		<init ref="id9"/>
+		<transition id="id11">
+			<source ref="id3"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-714" y="178">Preempt[id]?</label>
+			<label kind="assignment" x="-714" y="161">preempt(3)</label>
+			<nail x="-136" y="161"/>
+			<nail x="-731" y="161"/>
+			<nail x="-731" y="-263"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id2"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-722" y="42">Preempt[id]?</label>
+			<label kind="assignment" x="-714" y="25">preempt(2)</label>
+			<nail x="-136" y="25"/>
+			<nail x="-731" y="25"/>
+			<nail x="-731" y="-263"/>
+		</transition>
+		<transition id="id13">
+			<source ref="id1"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-722" y="-85">Preempt[id]?</label>
+			<label kind="assignment" x="-722" y="-102">preempt(1)</label>
+			<nail x="-144" y="-102"/>
+			<nail x="-731" y="-102"/>
+			<nail x="-731" y="-263"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-722" y="-195">Preempt[id]?</label>
+			<label kind="assignment" x="-722" y="-212">preempt(0)</label>
+			<nail x="-144" y="-212"/>
+			<nail x="-731" y="-212"/>
+			<nail x="-731" y="-263"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id10"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-756" y="-331">Ready!</label>
+			<label kind="assignment" x="-756" y="-306">ready()</label>
+			<nail x="-671" y="-306"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id9"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-603" y="-365">Ready!</label>
+			<label kind="assignment" x="-603" y="-382">initControl(id)</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id6"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-595" y="-178">resume(1)</label>
+			<label kind="synchronisation" x="-510" y="-178">Resume[id]?</label>
+			<label kind="assignment" x="-595" y="-153">resume2(1)</label>
+			<nail x="-612" y="-221"/>
+			<nail x="-612" y="-153"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-595" y="170">resume(4)</label>
+			<label kind="synchronisation" x="-442" y="187">Resume[id]?</label>
+			<label kind="assignment" x="-595" y="187">resume2(4), x=0</label>
+			<nail x="-612" y="187"/>
+			<nail x="-119" y="187"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id4"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-714" y="246">Preempt[id]?</label>
+			<label kind="assignment" x="-714" y="229">preempt(4)</label>
+			<nail x="-731" y="229"/>
+			<nail x="-731" y="-263"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-595" y="51">resume(3)</label>
+			<label kind="synchronisation" x="-510" y="51">Resume[id]?</label>
+			<label kind="assignment" x="-595" y="76">resume2(3)</label>
+			<nail x="-612" y="76"/>
+			<nail x="-119" y="76"/>
+		</transition>
+		<transition id="id21">
+			<source ref="id6"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-594" y="-68">resume(2)</label>
+			<label kind="synchronisation" x="-500" y="-68">Resume[id]?</label>
+			<label kind="assignment" x="-594" y="-42">resume2(2)</label>
+			<nail x="-612" y="-42"/>
+			<nail x="-119" y="-42"/>
+		</transition>
+		<transition id="id22">
+			<source ref="id7"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-459" y="119">x&gt;=sleep2</label>
+			<nail x="-773" y="119"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id8"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-459" y="-8">x&gt;=sleep1</label>
+			<nail x="-773" y="-8"/>
+		</transition>
+		<transition id="id24">
+			<source ref="id6"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-484" y="-280">resume(0)</label>
+			<label kind="synchronisation" x="-391" y="-280">Resume[id]?</label>
+			<label kind="assignment" x="-484" y="-263">resume2(0)</label>
+			<nail x="-561" y="-263"/>
+		</transition>
+		<transition id="id25">
+			<source ref="id5"/>
+			<target ref="id0"/>
+			<nail x="59" y="323"/>
+			<nail x="59" y="-263"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-110" y="255">x&gt;=process_rmd</label>
+			<label kind="assignment" x="-110" y="272">x=0</label>
+		</transition>
+		<transition id="id27">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-119" y="152">stop_record[id]!</label>
+			<label kind="assignment" x="-110" y="178">x=0</label>
+		</transition>
+		<transition id="id28">
+			<source ref="id2"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-279" y="42">start_record[id]!</label>
+			<label kind="assignment" x="-110" y="34">x=0, suspend(3)</label>
+			<nail x="-119" y="59"/>
+			<nail x="-297" y="59"/>
+		</transition>
+		<transition id="id29">
+			<source ref="id1"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-289" y="-76">!sensor_detected[id]</label>
+			<label kind="synchronisation" x="-238" y="-93">SensorOff[id]?</label>
+			<label kind="assignment" x="-110" y="-85">x=0, suspend(2)</label>
+			<nail x="-119" y="-59"/>
+			<nail x="-297" y="-59"/>
+		</transition>
+		<transition id="id30">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-110" y="-204">sensor_detected[id]</label>
+			<label kind="synchronisation" x="-110" y="-221">SensorOn[id]?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Scheduler</name>
+		<declaration>
+
+</declaration>
+		<location id="id31" x="-782" y="-170">
+			<name x="-792" y="-200">Init</name>
+			<committed/>
+		</location>
+		<location id="id32" x="-578" y="102">
+			<name x="-561" y="102">Select</name>
+			<urgent/>
+		</location>
+		<location id="id33" x="-578" y="-169">
+			<name x="-569" y="-204">Occ</name>
+		</location>
+		<location id="id34" x="-578" y="-34">
+			<name x="-552" y="-34">ProcessAwake</name>
+			<urgent/>
+		</location>
+		<init ref="id31"/>
+		<transition id="id35">
+			<source ref="id33"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-433" y="-255">!isEmpty() &amp;&amp; not_running()</label>
+			<label kind="synchronisation" x="-433" y="-272">Resume[top_priority()]!</label>
+			<nail x="-578" y="-306"/>
+			<nail x="-442" y="-306"/>
+			<nail x="-442" y="-170"/>
+		</transition>
+		<transition id="id36">
+			<source ref="id34"/>
+			<target ref="id32"/>
+			<label kind="guard" x="-501" y="25">not_running() &amp;&amp; !preemptable()</label>
+			<nail x="-510" y="34"/>
+		</transition>
+		<transition id="id37">
+			<source ref="id34"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-442" y="-110">!preemptable() &amp;&amp; !not_running()</label>
+			<nail x="-442" y="-34"/>
+			<nail x="-442" y="-170"/>
+		</transition>
+		<transition id="id38">
+			<source ref="id34"/>
+			<target ref="id32"/>
+			<label kind="guard" x="-748" y="8">preemptable()</label>
+			<label kind="synchronisation" x="-790" y="34">Preempt[running()]!</label>
+			<nail x="-646" y="34"/>
+		</transition>
+		<transition id="id39">
+			<source ref="id31"/>
+			<target ref="id33"/>
+			<label kind="assignment" x="-739" y="-195">initialize()</label>
+		</transition>
+		<transition id="id40">
+			<source ref="id33"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="-637" y="-119">Ready?</label>
+		</transition>
+		<transition id="id41">
+			<source ref="id32"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-459" y="76">Resume[top_priority()]!</label>
+			<nail x="-136" y="102"/>
+			<nail x="-136" y="-170"/>
+		</transition>
+	</template>
+	<template>
+		<name>Sensor</name>
+		<parameter>belt_id_t belt_id</parameter>
+		<location id="id42" x="-170" y="0">
+		</location>
+		<init ref="id42"/>
+		<transition id="id43">
+			<source ref="id42"/>
+			<target ref="id42"/>
+			<label kind="guard" x="-170" y="102">!sensor_detected[belt_id]</label>
+			<label kind="synchronisation" x="-161" y="76">SensorOff[belt_id]!</label>
+			<nail x="-170" y="102"/>
+			<nail x="0" y="102"/>
+			<nail x="0" y="0"/>
+		</transition>
+		<transition id="id44">
+			<source ref="id42"/>
+			<target ref="id42"/>
+			<label kind="guard" x="-170" y="-127">sensor_detected[belt_id]</label>
+			<label kind="synchronisation" x="-153" y="-102">SensorOn[belt_id]!</label>
+			<nail x="-170" y="-102"/>
+			<nail x="0" y="-102"/>
+			<nail x="0" y="0"/>
+		</transition>
+	</template>
+	<template>
+		<name>Item</name>
+		<parameter>belt_id_t belt_id, item_id_t item_id</parameter>
+		<declaration>clock x;
+clock y;
+bool recorded = false;
+bool error = false;
+
+const int ARRIVAL_DIST = 24;</declaration>
+		<location id="id45" x="-714" y="-502">
+			<name x="-697" y="-511">Laser</name>
+			<label kind="invariant" x="-773" y="-511">x&lt;=6</label>
+		</location>
+		<location id="id46" x="-714" y="-374">
+			<name x="-697" y="-383">BeforeVideo</name>
+			<label kind="invariant" x="-765" y="-383">x&lt;=5</label>
+		</location>
+		<location id="id47" x="-714" y="-238">
+			<name x="-697" y="-247">InFrame</name>
+			<label kind="invariant" x="-705" y="-230">x &lt;= 16</label>
+		</location>
+		<location id="id48" x="-714" y="-102">
+			<name x="-739" y="-85">End</name>
+			<urgent/>
+		</location>
+		<location id="id49" x="-714" y="-646">
+			<name x="-765" y="-680">Start</name>
+			<label kind="comments" x="-688" y="-680">The time precision is 100 ms = 1 unit</label>
+		</location>
+		<location id="id50" x="-918" y="-238">
+			<name x="-943" y="-280">Record</name>
+		</location>
+		<location id="id51" x="-1122" y="-238">
+			<urgent/>
+		</location>
+		<init ref="id49"/>
+		<transition id="id52">
+			<source ref="id51"/>
+			<target ref="id48"/>
+			<label kind="guard" x="-1105" y="-119">x&gt;16</label>
+			<label kind="assignment" x="-1054" y="-119">error=true</label>
+			<nail x="-1122" y="-102"/>
+		</transition>
+		<transition id="id53">
+			<source ref="id50"/>
+			<target ref="id51"/>
+			<label kind="synchronisation" x="-1105" y="-263">stop_record[belt_id]?</label>
+		</transition>
+		<transition id="id54">
+			<source ref="id51"/>
+			<target ref="id47"/>
+			<label kind="guard" x="-1020" y="-195">y &lt; 4</label>
+			<label kind="assignment" x="-952" y="-195">recorded = false</label>
+			<nail x="-1088" y="-170"/>
+			<nail x="-748" y="-170"/>
+		</transition>
+		<transition id="id55">
+			<source ref="id51"/>
+			<target ref="id47"/>
+			<label kind="guard" x="-1020" y="-331">y &gt;= 4</label>
+			<label kind="assignment" x="-943" y="-331">recorded = true</label>
+			<nail x="-1088" y="-306"/>
+			<nail x="-748" y="-306"/>
+		</transition>
+		<transition id="id56">
+			<source ref="id47"/>
+			<target ref="id50"/>
+			<label kind="synchronisation" x="-909" y="-263">start_record[belt_id]?</label>
+			<label kind="assignment" x="-824" y="-280">y = 0</label>
+		</transition>
+		<transition id="id57">
+			<source ref="id47"/>
+			<target ref="id48"/>
+			<label kind="guard" x="-705" y="-213">x&gt;=16</label>
+			<label kind="assignment" x="-705" y="-178">x=0</label>
+		</transition>
+		<transition id="id58">
+			<source ref="id49"/>
+			<target ref="id45"/>
+			<label kind="guard" x="-875" y="-620">x &gt;= ARRIVAL_DIST</label>
+			<label kind="assignment" x="-977" y="-595">sensor_detected[belt_id]=true,
+x=0, recorded =false</label>
+		</transition>
+		<transition id="id59">
+			<source ref="id46"/>
+			<target ref="id47"/>
+			<label kind="guard" x="-705" y="-331">x&gt;=5</label>
+			<label kind="assignment" x="-705" y="-314">x=0</label>
+		</transition>
+		<transition id="id60">
+			<source ref="id45"/>
+			<target ref="id46"/>
+			<label kind="guard" x="-705" y="-434">x&gt;=2</label>
+			<label kind="assignment" x="-969" y="-451">x=0,
+sensor_detected[belt_id]=false</label>
+		</transition>
+		<transition id="id61">
+			<source ref="id48"/>
+			<target ref="id49"/>
+			<label kind="assignment" x="-629" y="-127">x=0</label>
+			<nail x="-510" y="-102"/>
+			<nail x="-510" y="-646"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+// List one or more processes to be composed into a system.
+
+system 
+Control,
+Sensor,
+Scheduler,
+Item
+;
+</system>
+	<queries>
+		<option key="--diagnostic" value="1"/>
+		<query>
+			<formula/>
+			<comment>=== Sanity checks</comment>
+		</query>
+		<query>
+			<formula>A[] !deadlock</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Control(0).SendId</formula>
+			<comment/>
+			<option key="--diagnostic" value="1"/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:53:43 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; exists(i: pid_t) Item(i, 0).recorded == true</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:53:44 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; forall(i: pid_t) Item(i, 0).End</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:53:44 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>Item(0, 0).Laser --&gt; Control(0).SendId</formula>
+			<comment/>
+			<option key="--diagnostic" value="1"/>
+		</query>
+		<query>
+			<formula/>
+			<comment>=== The belt involved with the high priority process is always successful ===</comment>
+		</query>
+		<query>
+			<formula>A[] forall(j: item_id_t) Item(0, j).End imply Item(0, j).recorded == true</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>A[] forall(j: item_id_t) Item(0, j).error == false</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:21:57 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment>=== The belt involved with the low priority process sometimes fails</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Item(1, 0).recorded == true and Item(1,0).error == false</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 16:51:03 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; forall(j: item_id_t) Item(1, j).error == false</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:21:57 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; forall(j: item_id_t) Item(1, j).error == true</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:21:58 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] forall(j: item_id_t) Item(1, j).End imply Item(1, j).recorded == true</formula>
+			<comment/>
+			<result outcome="failure" type="quality" timestamp="2024-05-20 15:21:58 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>A[] forall(i: belt_id_t) forall(j: item_id_t) Item(i, j).End imply Item(i, j).recorded == true</formula>
+			<comment/>
+			<result outcome="failure" type="quality" timestamp="2024-05-20 15:21:59 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment>=== Processes can be asleep at the same time</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; forall(j: pid_t) Control(j).Sleep1 &amp;&amp; not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:21:59 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; forall(j: pid_t) Control(j).Sleep2 &amp;&amp; not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2024-05-20 15:22:00 +0200">
+				<option key="--diagnostic" value="1"/>
+			</result>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+	</queries>
+</nta>
